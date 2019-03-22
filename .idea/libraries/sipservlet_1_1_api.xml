@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sipservlet-1_1-api">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../SipServlet-v1.1-Spec/lib/sipservlet-1_1-api.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../SipServlet-v1.1-Spec/javadocs/sipservlet-1_1-docs.jar!/" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>
