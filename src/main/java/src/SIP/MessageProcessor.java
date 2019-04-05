@@ -1,4 +1,4 @@
-package src;
+package src.SIP;
 
 public interface MessageProcessor
 {

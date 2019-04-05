@@ -1,7 +1,8 @@
-package src;
+package src.SIP;
 
 
-import java.net.InetAddress;
+import src.SIP.MessageProcessor;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -39,6 +40,8 @@ import javax.sip.header.ViaHeader;
 import javax.sip.message.MessageFactory;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
+
+
 
 public class SipLayer implements SipListener {
 
