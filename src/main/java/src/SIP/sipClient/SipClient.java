@@ -4,6 +4,8 @@ import javax.sip.*;
 import javax.swing.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sip.address.*;
 import javax.sip.header.*;
 import javax.sip.message.*;
@@ -30,8 +32,13 @@ public class SipClient extends JFrame implements SipListener {
     int port = 6060;                // The local port.
     String protocol = "udp";        // The local protocol (UDP).
     int tag = (new Random()).nextInt(); // The local tag.
+    private String remoteTag;    //The remote tag.
     Address contactAddress;         // The contact address.
     ContactHeader contactHeader;    // The contact header.
+
+
+    Dialog dialog; //
+
 
     /**
      * Creates new form SipClient
@@ -79,7 +86,6 @@ public class SipClient extends JFrame implements SipListener {
         });
 
         buttonRegisterStatefull.setText("Reg (SF)");
-        buttonRegisterStatefull.setEnabled(false);
         buttonRegisterStatefull.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 onRegisterStatefull(evt);
@@ -94,7 +100,6 @@ public class SipClient extends JFrame implements SipListener {
         });
 
         buttonBye.setText("Bye");
-        buttonBye.setEnabled(false);
         buttonBye.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 onBye(evt);
@@ -231,6 +236,8 @@ public class SipClient extends JFrame implements SipListener {
             // Display the message in the text area.
             this.textArea.append(
                     "Request sent:\n" + request.toString() + "\n\n");
+
+            System.out.println("stateless" + request.toString());
         }
         catch(Exception e) {
             // If an error occurred, display the error.
@@ -240,14 +247,137 @@ public class SipClient extends JFrame implements SipListener {
 
     private void onRegisterStatefull(java.awt.event.ActionEvent evt) {
         // A method called when you click on the "Reg (SF)" button.
+
+
+        try {
+            // Get the destination address from the text field.
+            Address addressTo = this.addressFactory.createAddress(this.textField.getText());
+            // Create the request URI for the SIP message.
+            javax.sip.address.URI requestURI = addressTo.getURI();
+
+            // Create the SIP message headers.
+
+            // The "Via" headers.
+            ArrayList viaHeaders = new ArrayList();
+            ViaHeader viaHeader = this.headerFactory.createViaHeader(this.ip, this.port, "udp", null);
+            viaHeaders.add(viaHeader);
+            // The "Max-Forwards" header.
+            MaxForwardsHeader maxForwardsHeader = this.headerFactory.createMaxForwardsHeader(70);
+            // The "Call-Id" header.
+            CallIdHeader callIdHeader = this.sipProvider.getNewCallId();
+            // The "CSeq" header.
+            CSeqHeader cSeqHeader = this.headerFactory.createCSeqHeader(1L,"REGISTER");
+            // The "From" header.
+            FromHeader fromHeader = this.headerFactory.createFromHeader(this.contactAddress, String.valueOf(this.tag));
+            // The "To" header.
+            ToHeader toHeader = this.headerFactory.createToHeader(addressTo, null);
+
+            // Create the REGISTER request.
+            Request request = this.messageFactory.createRequest(
+                    requestURI,
+                    "REGISTER",
+                    callIdHeader,
+                    cSeqHeader,
+                    fromHeader,
+                    toHeader,
+                    viaHeaders,
+                    maxForwardsHeader);
+            // Add the "Contact" header to the request.
+            request.addHeader(contactHeader);
+
+            // Send the request statelessly through the SIP provider.
+// this.sipProvider.sendRequest(request);
+
+// Create a new SIP client transaction.
+            ClientTransaction transaction = this.sipProvider.getNewClientTransaction(request);
+// Send the request statefully, through the client transaction.
+            transaction.sendRequest();
+
+            // Display the message in the text area.
+            this.textArea.append(
+                    "Request sent:\n" + request.toString() + "\n\n");
+
+            System.out.println("statefull" + request.toString());
+        }
+        catch(Exception e) {
+            // If an error occurred, display the error.
+            this.textArea.append("Request sent failed: " + e.getMessage() + "\n");
+        }
+
     }
 
     private void onInvite(java.awt.event.ActionEvent evt) {
         // A method called when you click on the "Invite" button.
+
+
+
+        try {
+            // Get the destination address from the text field.
+            Address addressTo = this.addressFactory.createAddress(this.textField.getText());
+            // Create the request URI for the SIP message.
+            javax.sip.address.URI requestURI = addressTo.getURI();
+
+
+            // Create the SIP message headers.
+
+            // The "Via" headers.
+            ArrayList viaHeaders = new ArrayList();
+            ViaHeader viaHeader = this.headerFactory.createViaHeader(this.ip, this.port, "udp", null);
+            viaHeaders.add(viaHeader);
+            // The "Max-Forwards" header.
+            MaxForwardsHeader maxForwardsHeader = this.headerFactory.createMaxForwardsHeader(70);
+            // The "Call-Id" header.
+            CallIdHeader callIdHeader = this.sipProvider.getNewCallId();
+            // The "CSeq" header.
+            CSeqHeader cSeqHeader = this.headerFactory.createCSeqHeader(1L, Request.INVITE);
+            // The "From" header.
+            FromHeader fromHeader = this.headerFactory.createFromHeader(this.contactAddress, String.valueOf(this.tag));
+            // The "To" header.
+            ToHeader toHeader = this.headerFactory.createToHeader(addressTo, remoteTag);
+
+            // Create the REGISTER request.
+            Request request = this.messageFactory.createRequest(
+                    requestURI,
+                    "INVITE",
+                    callIdHeader,
+                    cSeqHeader,
+                    fromHeader,
+                    toHeader,
+                    viaHeaders,
+                    maxForwardsHeader);
+            // Add the "Contact" header to the request.
+            request.addHeader(contactHeader);
+
+            // Send the request statelessly through the SIP provider.
+// this.sipProvider.sendRequest(request);
+            System.out.println(request);
+// Create a new SIP client transaction.
+            ClientTransaction transaction = this.sipProvider.getNewClientTransaction(request);
+// Send the request statefully, through the client transaction.
+            transaction.sendRequest();
+
+            // Display the message in the text area.
+            this.textArea.append(
+                    "Request sent:\n" + request.toString() + "\n\n");
+        }
+        catch(Exception e) {
+            // If an error occurred, display the error.
+            this.textArea.append("Request sent failed: " + e.getMessage() + "\n");
+        }
+
     }
 
     private void onBye(java.awt.event.ActionEvent evt) {
-        // A method called when you click on the "Bye" button.
+        try {
+            // A method called when you click on the "Bye" button.
+
+            Request request = this.dialog.createRequest("BYE");
+            ClientTransaction transaction = this.sipProvider.getNewClientTransaction(request);
+            this.dialog.sendRequest(transaction);
+        } catch (SipException ex) {
+            Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     /**
@@ -301,6 +431,17 @@ public class SipClient extends JFrame implements SipListener {
         // A method called when you receive a SIP request.
     }
 
+    private boolean isXResponse(ResponseEvent responseEvent, String method) {
+        Response response = responseEvent.getResponse();
+        String inResponseTo = response.getHeader("CSeq").toString();
+        if (inResponseTo.contains(method))
+            return true;
+        return false;
+    }
+
+    private boolean isInviteResponse(ResponseEvent responseEvent) {
+        return isXResponse(responseEvent, Request.INVITE);
+    }
     @Override
     public void processResponse(ResponseEvent responseEvent) {
         // A method called when you receive a SIP request.
@@ -309,6 +450,32 @@ public class SipClient extends JFrame implements SipListener {
         Response response = responseEvent.getResponse();
 // Display the response message in the text area.
         this.textArea.append("\nReceived response: " + response.toString());
+
+        ToHeader toHeader = (ToHeader)response.getHeader("To");
+
+        remoteTag=toHeader.getTag();
+
+        if (isInviteResponse(responseEvent))
+        {
+            dialog = responseEvent.getClientTransaction().getDialog();
+            System.out.println("dialog status"+ dialog!=null);
+            if(dialog!=null){
+                try {
+                    Request request = dialog.createAck(((CSeqHeader)response.getHeader("CSeq")).getSeqNumber());
+                    request.addHeader(contactHeader);
+                    dialog.sendAck(request);
+
+                } catch (InvalidArgumentException ex) {
+                    Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SipException ex) {
+                    Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+
+        }
+
+
     }
 
     @Override
