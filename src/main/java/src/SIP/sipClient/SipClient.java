@@ -10,6 +10,7 @@ import javax.sip.address.*;
 import javax.sip.header.*;
 import javax.sip.message.*;
 import org.apache.log4j.BasicConfigurator;
+
 /**
  *
  * @author Alex
@@ -308,6 +309,8 @@ public class SipClient extends JFrame implements SipListener {
 
     private void onInvite(java.awt.event.ActionEvent evt) {
         // A method called when you click on the "Invite" button.
+
+
 
 
 

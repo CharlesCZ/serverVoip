@@ -220,6 +220,18 @@ public class SipServer extends JFrame implements SipListener {
                 this.jTextArea.append(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
             }
             else if(request.getMethod().equals("INVITE")) {
+                //trying or not
+                response = this.messageFactory.createResponse(180, request);
+                ((ToHeader)response.getHeader("To")).setTag(String.valueOf(this.tag));
+                response.addHeader(this.contactHeader);
+                transaction.sendResponse(response);
+                this.jTextArea.append(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
+
+                //czy odebrać czy nie
+
+
+
+
                 // If the request is an INVITE.
                 response = this.messageFactory.createResponse(200, request);
                 ((ToHeader)response.getHeader("To")).setTag(String.valueOf(this.tag));

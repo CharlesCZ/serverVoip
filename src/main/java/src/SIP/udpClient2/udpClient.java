@@ -1,4 +1,4 @@
-package src.udpClient;
+package src.SIP.udpClient2;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -9,13 +9,17 @@ import java.net.UnknownHostException;
 public class udpClient{
 
     /**
-     * The host we want to connect to.
+     * Adress we want to be binded.
      */
-    private static final String HOST = System.getProperty("host", "192.168.0.11");
+    private  String HOST = System.getProperty("host", "192.168.0.11");
     /**
-     * The port to connect to the host with.
+     * The port  we want to be binded.
      */
-    private static final int PORT = Integer.parseInt(System.getProperty("port", "5081"));
+    private  int PORT = Integer.parseInt(System.getProperty("port", "5081"));
+
+    private  String serverHOST;
+
+    private  int serverPORT;
     /**
      * The DatagramSocket instance for server/client interaction.
      */
@@ -30,6 +34,39 @@ public class udpClient{
     private Speaker speaker;
 
 
+    public String getHOST() {
+        return HOST;
+    }
+
+    public void setHOST(String HOST) {
+        this.HOST = HOST;
+    }
+
+    public int getPORT() {
+        return PORT;
+    }
+
+    public void setPORT(int PORT) {
+        this.PORT = PORT;
+    }
+
+
+    public String getServerHOST() {
+        return serverHOST;
+    }
+
+    public void setServerHOST(String serverHOST) {
+        this.serverHOST = serverHOST;
+    }
+
+    public int getServerPORT() {
+        return serverPORT;
+    }
+
+    public void setServerPORT(int serverPORT) {
+        this.serverPORT = serverPORT;
+    }
+
     public udpClient() {
         this.microphone = new Microphone();
         this.speaker = new Speaker();
@@ -42,7 +79,7 @@ public class udpClient{
 
         socket = new DatagramSocket(PORT,clientAddress); //Otwarcie gniazda
 
-socket.connect(InetAddress.getByName("192.168.0.11"),5080);
+socket.connect(InetAddress.getByName(serverHOST),serverPORT);
         System.out.println(socket.getPort()+" "+socket.getInetAddress());
         //Reads data received from server
         new Thread(new Runnable() {
@@ -81,7 +118,7 @@ socket.connect(InetAddress.getByName("192.168.0.11"),5080);
                             int read = microphone.read(buffer, 0, buffer.length);
                            // System.out.println("wewnatrz microph");
                            // System.out.println(read);
-                            DatagramPacket sentPacket = new DatagramPacket(buffer, read, InetAddress.getByName("192.168.0.11"),5080);
+                            DatagramPacket sentPacket = new DatagramPacket(buffer, read, InetAddress.getByName(serverHOST),serverPORT);
                             socket.send(sentPacket);
                         } catch (Exception e) {
                             System.err.println("Could not send data to server:"+ e.getMessage());
@@ -99,7 +136,16 @@ socket.connect(InetAddress.getByName("192.168.0.11"),5080);
 
     public static void main(String[] args) throws IOException, UnknownHostException {
 
+
+
+
 udpClient client=new udpClient();
+        client.setHOST(System.getProperty("host", "192.168.0.11"));
+        client.setPORT(Integer.parseInt(System.getProperty("port", "5080")));
+        client.setServerHOST(System.getProperty("serverhost", "192.168.0.11"));
+        client.setServerPORT(Integer.parseInt(System.getProperty("port", "5081")));
+        client.init();
+
 client.init();
 
     }

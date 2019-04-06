@@ -1,4 +1,4 @@
-package src.udpClient;
+package src.udpP2P;
 
 import javax.sound.sampled.*;
 
