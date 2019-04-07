@@ -6,16 +6,16 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class udpP2P {
+public class UdpP2P {
 
     /**
      * Adress we want to be binded.
      */
-    private  String HOST = System.getProperty("host", "192.168.0.11");
+    private  String HOST;
     /**
      * The port  we want to be binded.
      */
-    private  int PORT = Integer.parseInt(System.getProperty("port", "5081"));
+    private  int PORT;
 
     private  String serverHOST;
 
@@ -67,7 +67,7 @@ public class udpP2P {
         this.serverPORT = serverPORT;
     }
 
-    public udpP2P() {
+    public UdpP2P() {
         this.microphone = new Microphone();
         this.speaker = new Speaker();
     }
@@ -87,15 +87,17 @@ socket.connect(InetAddress.getByName(serverHOST),serverPORT);
             public void run() {
                 if (speaker.open()) {
                     speaker.start();
-                  //  System.out.println("port gniazda"+socket.getPort());
+                //  System.out.println(socket.isConnected());
                     while (socket.isConnected()) {
                         try {
                             byte[] buffer = new byte[speaker.getBufferSize() / 5];
                             DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
                              socket.receive(receivedPacket);
-                            int read =receivedPacket.getLength();
-                            speaker.write(buffer, 0, read);
-
+                          //  System.out.println(receivedPacket.getPort());
+                             if(receivedPacket.getPort()!=PORT) {
+                                 int read = receivedPacket.getLength();
+                                 speaker.write(buffer, 0, read);
+                             }
                         } catch (IOException e) {
                             System.err.println("Could not read data from server:" + e.getMessage());
                         }
@@ -130,23 +132,62 @@ socket.connect(InetAddress.getByName(serverHOST),serverPORT);
 
 
         System.out.println("po");
-        while (true);
+
     }
 
 
-    public static void main(String[] args) throws IOException, UnknownHostException {
+
+    static void initClient1() throws IOException {
+        UdpP2P client=new UdpP2P();
+        client.setHOST(System.getProperty("host", "192.168.0.11"));
+        client.setPORT(Integer.parseInt(System.getProperty("port", "5081")));
+        client.setServerHOST(System.getProperty("serverhost", "192.168.0.13"));
+        client.setServerPORT(Integer.parseInt(System.getProperty("port", "5080")));
+        client.init();
+
+    }
+
+    static  void initClient2() throws IOException {
+        UdpP2P client=new UdpP2P();
+        client.setHOST(System.getProperty("host", "192.168.0.13"));
+        client.setPORT(Integer.parseInt(System.getProperty("port", "5080")));
+        client.setServerHOST(System.getProperty("serverhost", "192.168.0.11"));
+        client.setServerPORT(Integer.parseInt(System.getProperty("port", "5081")));
+        client.init();
+
+    }
 
 
 
-
-udpP2P client=new udpP2P();
+    static void initClient3() throws IOException {
+        UdpP2P client=new UdpP2P();
         client.setHOST(System.getProperty("host", "192.168.0.11"));
         client.setPORT(Integer.parseInt(System.getProperty("port", "5081")));
         client.setServerHOST(System.getProperty("serverhost", "192.168.0.11"));
         client.setServerPORT(Integer.parseInt(System.getProperty("port", "5080")));
         client.init();
+    }
 
-client.init();
+
+    static void initClient4() throws IOException {
+        UdpP2P client=new UdpP2P();
+        client.setHOST(System.getProperty("host", "192.168.0.11"));
+        client.setPORT(Integer.parseInt(System.getProperty("port", "5080")));
+        client.setServerHOST(System.getProperty("serverhost", "192.168.0.11"));
+        client.setServerPORT(Integer.parseInt(System.getProperty("port", "5081")));
+        client.init();
+    }
+    public static void main(String[] args) throws IOException, UnknownHostException {
+
+        initClient1();
+        //initClient2();
+//initClient3();
+      // initClient4();
+
+
+        while (true);
+
+
 
     }
 
