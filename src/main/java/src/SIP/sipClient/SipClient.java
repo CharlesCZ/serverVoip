@@ -2,6 +2,7 @@ package src.SIP.sipClient;
 
 import javax.sip.*;
 import javax.swing.*;
+import java.io.IOException;
 import java.net.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -10,6 +11,7 @@ import javax.sip.address.*;
 import javax.sip.header.*;
 import javax.sip.message.*;
 import org.apache.log4j.BasicConfigurator;
+import src.udpP2P.UdpP2P;
 
 /**
  *
@@ -29,8 +31,8 @@ public class SipClient extends JFrame implements SipListener {
     Properties properties;          // Other properties.
 
     // Objects keeping local configuration.
-    String ip;                      // The local IP address.
-    int port = 6060;                // The local port.
+    static String ip;                      // The local IP address.
+    static int port;                // The local port.
     String protocol = "udp";        // The local protocol (UDP).
     int tag = (new Random()).nextInt(); // The local tag.
     private String remoteTag;    //The remote tag.
@@ -107,7 +109,7 @@ public class SipClient extends JFrame implements SipListener {
             }
         });
 
-        textField.setText("sip:alice@localhost:5060");
+        textField.setText("sip:cezar@localhost:5079");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -387,6 +389,9 @@ public class SipClient extends JFrame implements SipListener {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+
+        port=5079;
+        ip=System.getProperty("host", "192.168.0.13");
         BasicConfigurator.configure();
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -468,10 +473,23 @@ public class SipClient extends JFrame implements SipListener {
                     request.addHeader(contactHeader);
                     dialog.sendAck(request);
 
+                    UdpP2P client2=new UdpP2P();
+                    client2.setHOST(ip);
+                    client2.setPORT(port+1);
+                    String[] URIclient2=request.getRequestURI().toString().split(":");
+                    String port2=URIclient2[2];
+                    String ip2=URIclient2[1];
+                    client2.setServerHOST(ip2);
+                    client2.setServerPORT(Integer.parseInt(port2+1));
+                    client2.init();
+
+
                 } catch (InvalidArgumentException ex) {
                     Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (SipException ex) {
                     Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
             }

@@ -1,6 +1,9 @@
 package src.SIP.sipServer;
 
 
+import org.apache.log4j.BasicConfigurator;
+import src.udpP2P.UdpP2P;
+
 import javax.sip.*;
 import javax.sip.address.Address;
 import javax.sip.address.AddressFactory;
@@ -30,12 +33,15 @@ public class SipServer extends JFrame implements SipListener {
     private ListeningPoint listeningPoint;
     private Properties properties;
 
-    private String ip;
-    private int port = 5060;
+    private static String ip;
+    private static int port;// = 5080;
     private String protocol = "udp";
     private int tag = (new Random()).nextInt();
     private Address contactAddress;
     private ContactHeader contactHeader;
+
+
+
 
     /**
      * Creates new form SipRegistrar
@@ -117,8 +123,8 @@ public class SipServer extends JFrame implements SipListener {
 
     private void onOpen(java.awt.event.WindowEvent evt) {
         try {
-            this.ip = InetAddress.getLocalHost().getHostAddress();
-
+          //  this.ip = InetAddress.getLocalHost().getHostAddress();
+           // this.ip = System.getProperty("host", "192.168.0.11");
             this.sipFactory = SipFactory.getInstance();
             this.sipFactory.setPathName("gov.nist");
             this.properties = new Properties();
@@ -154,6 +160,9 @@ public class SipServer extends JFrame implements SipListener {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        BasicConfigurator.configure();
+      port=5080;
+      ip=System.getProperty("host", "192.168.0.11");
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -199,6 +208,7 @@ public class SipServer extends JFrame implements SipListener {
 
         this.jTextArea.append("\nRECV " + request.getMethod() + " " + request.getRequestURI().toString());
 
+
         try {
             // Get or create the server transaction.
             ServerTransaction transaction = requestEvent.getServerTransaction();
@@ -241,6 +251,15 @@ public class SipServer extends JFrame implements SipListener {
             }
             else if(request.getMethod().equals("ACK")) {
                 // If the request is an ACK.
+                UdpP2P client1=new UdpP2P();
+                client1.setHOST(ip);
+                client1.setPORT(port+1);
+                String[] URIclient2=request.getRequestURI().toString().split(":");
+                String port2=URIclient2[2];
+                String ip2=URIclient2[1];
+                client1.setServerHOST(ip2);
+                client1.setServerPORT(Integer.parseInt(port2+1));
+                client1.init();
             }
             else if(request.getMethod().equals("BYE")) {
                 // If the request is a BYE.
