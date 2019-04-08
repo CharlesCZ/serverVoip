@@ -1,4 +1,4 @@
-package src.SIP.sipClient;
+package src;
 
 import javax.sip.*;
 import javax.swing.*;
@@ -41,7 +41,7 @@ public class SipClient extends JFrame implements SipListener {
 
 
     Dialog dialog; //
-
+    UdpP2P client2;
 
     /**
      * Creates new form SipClient
@@ -379,6 +379,7 @@ public class SipClient extends JFrame implements SipListener {
             Request request = this.dialog.createRequest("BYE");
             ClientTransaction transaction = this.sipProvider.getNewClientTransaction(request);
             this.dialog.sendRequest(transaction);
+            client2.endSession();
         } catch (SipException ex) {
             Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -388,10 +389,10 @@ public class SipClient extends JFrame implements SipListener {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    public static void main(String[] args) {
 
-        port=5079;
-        ip=System.getProperty("host", "192.168.0.13");
+        port=5082;
+        ip=System.getProperty("host", "192.168.0.11");
         BasicConfigurator.configure();
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -473,15 +474,17 @@ public class SipClient extends JFrame implements SipListener {
                     request.addHeader(contactHeader);
                     dialog.sendAck(request);
 
-                    UdpP2P client2=new UdpP2P();
+                    client2=new UdpP2P();
                     client2.setHOST(ip);
                     client2.setPORT(port+1);
+                    System.out.println(request.getRequestURI());
                     String[] URIclient2=request.getRequestURI().toString().split(":");
-                    String port2=URIclient2[2];
+                    int port2=Integer.valueOf(URIclient2[2]);
                     String ip2=URIclient2[1];
                     client2.setServerHOST(ip2);
-                    client2.setServerPORT(Integer.parseInt(port2+1));
-                    client2.init();
+                    client2.setServerPORT(port2+1);
+                 client2.init();
+
 
 
                 } catch (InvalidArgumentException ex) {

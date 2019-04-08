@@ -33,7 +33,8 @@ public class UdpP2P {
      */
     private Speaker speaker;
 
-
+Thread speakerThread;
+Thread microphoneThread;
     public String getHOST() {
         return HOST;
     }
@@ -82,12 +83,12 @@ public class UdpP2P {
 socket.connect(InetAddress.getByName(serverHOST),serverPORT);
         System.out.println(socket.getPort()+" "+socket.getInetAddress());
         //Reads data received from server
-        new Thread(new Runnable() {
+       speakerThread= new Thread(new Runnable() {
             @Override
             public void run() {
                 if (speaker.open()) {
                     speaker.start();
-                //  System.out.println(socket.isConnected());
+               // System.out.println("socket status speak "+socket.isConnected());
                     while (socket.isConnected()) {
                         try {
                             byte[] buffer = new byte[speaker.getBufferSize() / 5];
@@ -104,21 +105,23 @@ socket.connect(InetAddress.getByName(serverHOST),serverPORT);
                     }
                 }
             }
-        }).start();
+        });
+       speakerThread.start();
 
         System.out.println("miedzy");
         //Sends data to server
-        new Thread(new Runnable() {
+        microphoneThread=new Thread(new Runnable() {
             @Override
             public void run() {
                 if (microphone.open()) {
                     microphone.start();
-
+                 ////   System.out.println("socket status  mic"+socket.isConnected());
+                  //  System.out.println(socket.getPort()+" "+socket.getInetAddress());
                     while (socket.isConnected()) {
                         try {
                             byte[] buffer = new byte[microphone.getBufferSize() / 5];
                             int read = microphone.read(buffer, 0, buffer.length);
-                           // System.out.println("wewnatrz microph");
+                            //System.out.println("wewnatrz microph");
                            // System.out.println(read);
                             DatagramPacket sentPacket = new DatagramPacket(buffer, read, InetAddress.getByName(serverHOST),serverPORT);
                             socket.send(sentPacket);
@@ -128,13 +131,22 @@ socket.connect(InetAddress.getByName(serverHOST),serverPORT);
                     }
                 }
             }
-        }).start();
-
+        });
+microphoneThread.start();
 
         System.out.println("po");
 
     }
 
+public void endSession(){
+        microphone.stop();
+        microphoneThread.stop();
+        speaker.stop();
+        speakerThread.stop();
+        socket.disconnect();
+        socket.close();
+
+}
 
 
     static void initClient1() throws IOException {

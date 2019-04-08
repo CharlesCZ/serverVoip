@@ -17,6 +17,8 @@ import java.net.InetAddress;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -39,7 +41,7 @@ public class SipServer extends JFrame implements SipListener {
     private int tag = (new Random()).nextInt();
     private Address contactAddress;
     private ContactHeader contactHeader;
-
+    UdpP2P client1;
 
 
 
@@ -163,6 +165,7 @@ public class SipServer extends JFrame implements SipListener {
         BasicConfigurator.configure();
       port=5080;
       ip=System.getProperty("host", "192.168.0.11");
+        //ip=System.getProperty("host", "192.168.43.52");
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -230,6 +233,8 @@ public class SipServer extends JFrame implements SipListener {
                 this.jTextArea.append(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
             }
             else if(request.getMethod().equals("INVITE")) {
+
+
                 //trying or not
                 response = this.messageFactory.createResponse(180, request);
                 ((ToHeader)response.getHeader("To")).setTag(String.valueOf(this.tag));
@@ -251,14 +256,32 @@ public class SipServer extends JFrame implements SipListener {
             }
             else if(request.getMethod().equals("ACK")) {
                 // If the request is an ACK.
-                UdpP2P client1=new UdpP2P();
+                client1=new UdpP2P();
                 client1.setHOST(ip);
                 client1.setPORT(port+1);
-                String[] URIclient2=request.getRequestURI().toString().split(":");
-                String port2=URIclient2[2];
-                String ip2=URIclient2[1];
-                client1.setServerHOST(ip2);
-                client1.setServerPORT(Integer.parseInt(port2+1));
+
+                String line=request.getHeader("From").toString();
+
+
+                // String to be scanned to find the pattern.
+                String pattern = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d{1,5})";
+
+                // Create a Pattern object
+                Pattern r = Pattern.compile(pattern);
+
+                // Now create matcher object.
+                Matcher m = r.matcher(line);
+                if (m.find( )) {
+                    System.out.println("Found value: " + m.group(0) );
+                    System.out.println("Found value: " + m.group(1) );
+                    System.out.println("Found value: " + m.group(2) );
+                }else {
+                    System.out.println("NO MATCH");
+                }
+
+                client1.setServerHOST(m.group(1));
+                client1.setServerPORT(Integer.valueOf(m.group(2))+1);
+                System.out.println("CLIENT1  "+client1.getHOST()+client1.getPORT()+"  server"+client1.getServerHOST()+" "+client1.getServerPORT());
                 client1.init();
             }
             else if(request.getMethod().equals("BYE")) {
@@ -268,6 +291,7 @@ public class SipServer extends JFrame implements SipListener {
                 response.addHeader(this.contactHeader);
                 transaction.sendResponse(response);
                 this.jTextArea.append(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
+                client1.endSession();
             }
         }
         catch(SipException e) {
