@@ -262,7 +262,6 @@ public class SipServer extends JFrame implements SipListener {
 
                 String line=request.getHeader("From").toString();
 
-
                 // String to be scanned to find the pattern.
                 String pattern = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d{1,5})";
 
@@ -290,8 +289,11 @@ public class SipServer extends JFrame implements SipListener {
                 ((ToHeader)response.getHeader("To")).setTag(String.valueOf(this.tag));
                 response.addHeader(this.contactHeader);
                 transaction.sendResponse(response);
-                this.jTextArea.append(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
                 client1.endSession();
+                transaction.terminate();
+
+                this.jTextArea.append(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
+
             }
         }
         catch(SipException e) {

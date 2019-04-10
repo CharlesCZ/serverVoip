@@ -73,7 +73,7 @@ public class Microphone {
 	 * Closes {@link Microphone#TargetDataLine}.
 	 */
 	public void stop() {
-		line.stop();
+		line.close();
 		line.flush();
 	}
 

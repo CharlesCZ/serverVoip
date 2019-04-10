@@ -1,15 +1,19 @@
 package src;
 
 import javax.sip.*;
+import javax.sip.address.URI;
 import javax.swing.*;
 import java.io.IOException;
 import java.net.*;
+import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sip.address.*;
 import javax.sip.header.*;
 import javax.sip.message.*;
+
+
 import org.apache.log4j.BasicConfigurator;
 import src.udpP2P.UdpP2P;
 
@@ -42,7 +46,7 @@ public class SipClient extends JFrame implements SipListener {
 
     Dialog dialog; //
     UdpP2P client2;
-
+    Logger Log= Logger.getLogger("SipClient.class");
     /**
      * Creates new form SipClient
      */
@@ -157,7 +161,7 @@ public class SipClient extends JFrame implements SipListener {
 
         try {
             // Get the local IP address.
-            this.ip = InetAddress.getLocalHost().getHostAddress();
+           // this.ip = InetAddress.getLocalHost().getHostAddress();
             // Create the SIP factory and set the path name.
             this.sipFactory = SipFactory.getInstance();
             this.sipFactory.setPathName("gov.nist");
@@ -355,7 +359,7 @@ public class SipClient extends JFrame implements SipListener {
 
             // Send the request statelessly through the SIP provider.
 // this.sipProvider.sendRequest(request);
-            System.out.println(request);
+         //   System.out.println(request);
 // Create a new SIP client transaction.
             ClientTransaction transaction = this.sipProvider.getNewClientTransaction(request);
 // Send the request statefully, through the client transaction.
@@ -379,7 +383,7 @@ public class SipClient extends JFrame implements SipListener {
             Request request = this.dialog.createRequest("BYE");
             ClientTransaction transaction = this.sipProvider.getNewClientTransaction(request);
             this.dialog.sendRequest(transaction);
-            client2.endSession();
+
         } catch (SipException ex) {
             Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -437,26 +441,33 @@ public class SipClient extends JFrame implements SipListener {
 
     @Override
     public void processRequest(RequestEvent requestEvent) {
+        System.out.println("request000");
+        System.out.println(requestEvent.getRequest());;
         // A method called when you receive a SIP request.
     }
 
-    private boolean isXResponse(ResponseEvent responseEvent, String method) {
-        Response response = responseEvent.getResponse();
-        String inResponseTo = response.getHeader("CSeq").toString();
-        if (inResponseTo.contains(method))
-            return true;
-        return false;
-    }
-
-    private boolean isInviteResponse(ResponseEvent responseEvent) {
-        return isXResponse(responseEvent, Request.INVITE);
-    }
     @Override
     public void processResponse(ResponseEvent responseEvent) {
-        // A method called when you receive a SIP request.
+        //Dla register tez bys musial response dac
 
+
+
+        // A method called when you receive a SIP request.
+        System.out.println("proces response w "+responseEvent.getClientTransaction().toString());
+
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         // Get the response.
         Response response = responseEvent.getResponse();
+        CSeqHeader cseq = (CSeqHeader) response.getHeader(CSeqHeader.NAME);
+
+        ClientTransaction tid = responseEvent.getClientTransaction();
+        System.out.println("client trans"+tid);
+
+
 // Display the response message in the text area.
         this.textArea.append("\nReceived response: " + response.toString());
 
@@ -464,28 +475,36 @@ public class SipClient extends JFrame implements SipListener {
 
         remoteTag=toHeader.getTag();
 
-        if (isInviteResponse(responseEvent))
-        {
-            dialog = responseEvent.getClientTransaction().getDialog();
-            System.out.println("dialog status"+ dialog!=null);
-            if(dialog!=null){
+
+
+          //  if (isInviteResponse(responseEvent)) {
+        if (response.getStatusCode() == Response.OK) {
+            System.out.println(cseq.getMethod());
+            if (cseq.getMethod().equals(Request.INVITE)) {
                 try {
-                    Request request = dialog.createAck(((CSeqHeader)response.getHeader("CSeq")).getSeqNumber());
-                    request.addHeader(contactHeader);
-                    dialog.sendAck(request);
 
-                    client2=new UdpP2P();
-                    client2.setHOST(ip);
-                    client2.setPORT(port+1);
-                    System.out.println(request.getRequestURI());
-                    String[] URIclient2=request.getRequestURI().toString().split(":");
-                    int port2=Integer.valueOf(URIclient2[2]);
-                    String ip2=URIclient2[1];
-                    client2.setServerHOST(ip2);
-                    client2.setServerPORT(port2+1);
-                 client2.init();
+                    if (responseEvent.getClientTransaction() != null) {
+                        dialog = responseEvent.getDialog();
+                        if (dialog != null) {
+
+                            Request request = dialog.createAck(((CSeqHeader) response.getHeader("CSeq")).getSeqNumber());
+                            request.addHeader(contactHeader);
+                            dialog.sendAck(request);
+                            responseEvent.getClientTransaction().terminate();;
 
 
+                            client2 = new UdpP2P();
+                            client2.setHOST(ip);
+                            client2.setPORT(port + 1);
+                            System.out.println(request.getRequestURI());
+                            String[] URIclient2 = request.getRequestURI().toString().split(":");
+                            int port2 = Integer.valueOf(URIclient2[2]);
+                            String ip2 = URIclient2[1];
+                            client2.setServerHOST(ip2);
+                            client2.setServerPORT(port2 + 1);
+                            client2.init();
+                        }
+                    }
 
                 } catch (InvalidArgumentException ex) {
                     Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
@@ -495,12 +514,25 @@ public class SipClient extends JFrame implements SipListener {
                     e.printStackTrace();
                 }
 
+            }else if(cseq.getMethod().equals(Request.BYE)){
+             //  System.out.println("wejscie do bye");
+                Log.info(client2.getSocket().toString());
+                client2.endSession();
+                try {
+                    responseEvent.getClientTransaction().terminate();
+                } catch (ObjectInUseException e) {
+                    e.printStackTrace();
+                }
+                dialog.delete();
+
+
             }
+        }
 
         }
 
 
-    }
+
 
     @Override
     public void processTimeout(TimeoutEvent timeoutEvent) {

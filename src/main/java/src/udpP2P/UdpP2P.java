@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.logging.Logger;
 
 public class UdpP2P {
 
@@ -35,6 +36,7 @@ public class UdpP2P {
 
 Thread speakerThread;
 Thread microphoneThread;
+    Logger Log= Logger.getLogger("UdpP2P.class");
     public String getHOST() {
         return HOST;
     }
@@ -68,6 +70,14 @@ Thread microphoneThread;
         this.serverPORT = serverPORT;
     }
 
+    public DatagramSocket getSocket() {
+        return socket;
+    }
+
+    public void setSocket(DatagramSocket socket) {
+        this.socket = socket;
+    }
+
     public UdpP2P() {
         this.microphone = new Microphone();
         this.speaker = new Speaker();
@@ -77,7 +87,8 @@ Thread microphoneThread;
    public void init() throws IOException {
         InetAddress clientAddress = InetAddress.getByName(HOST);
 
-
+       System.out.println("tu zawsze wywala");
+       System.out.println(PORT+"    "+clientAddress);
         socket = new DatagramSocket(PORT,clientAddress); //Otwarcie gniazda
 
 socket.connect(InetAddress.getByName(serverHOST),serverPORT);
@@ -139,12 +150,21 @@ microphoneThread.start();
     }
 
 public void endSession(){
+    try {
         microphone.stop();
         microphoneThread.stop();
+        microphoneThread=null;
         speaker.stop();
         speakerThread.stop();
-        socket.disconnect();
+        speakerThread=null;
+
+        Log.info(socket.toString()+"   is connected? "+socket.isConnected());
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }finally {
         socket.close();
+        System.out.println("po wszystkim EndSession");
+    }
 
 }
 

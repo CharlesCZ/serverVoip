@@ -77,7 +77,7 @@ public class Speaker {
 	 * Closes @link Speaker#SourceDataLine}.
 	 */
     public void stop() {
-        line.stop();
+        line.close();
         line.flush();
     }
  
