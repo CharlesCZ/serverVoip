@@ -14,6 +14,7 @@ import javax.sip.message.Response;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
@@ -125,8 +126,8 @@ public class SipServer extends JFrame implements SipListener {
 
     private void onOpen(java.awt.event.WindowEvent evt) {
         try {
-          //  this.ip = InetAddress.getLocalHost().getHostAddress();
-           // this.ip = System.getProperty("host", "192.168.0.11");
+            //  this.ip = InetAddress.getLocalHost().getHostAddress();
+            // this.ip = System.getProperty("host", "192.168.0.11");
             this.sipFactory = SipFactory.getInstance();
             this.sipFactory.setPathName("gov.nist");
             this.properties = new Properties();
@@ -161,10 +162,11 @@ public class SipServer extends JFrame implements SipListener {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    public static void main(String args[]) throws UnknownHostException {
         BasicConfigurator.configure();
-      port=5080;
-      ip=System.getProperty("host", "192.168.0.11");
+        port=5080;
+
+        ip=InetAddress.getLocalHost().getHostAddress();
         //ip=System.getProperty("host", "192.168.43.52");
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -293,6 +295,20 @@ public class SipServer extends JFrame implements SipListener {
                 transaction.terminate();
 
                 this.jTextArea.append(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
+
+            }
+            else if(request.getMethod().equals("MESSAGE")){
+                response = this.messageFactory.createResponse(200, request);
+                ((ToHeader)response.getHeader("To")).setTag(String.valueOf(this.tag));
+                response.addHeader(this.contactHeader);
+
+                ContentTypeHeader   contentTypeHeader = headerFactory
+                        .createContentTypeHeader("text", "plain");
+                response.setContent(response.getHeader("To").toString(),contentTypeHeader);
+
+                transaction.sendResponse(response);
+                this.jTextArea.append(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
+
 
             }
         }

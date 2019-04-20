@@ -17,13 +17,15 @@ import javax.sip.message.*;
 import org.apache.log4j.BasicConfigurator;
 import src.udpP2P.UdpP2P;
 
+import static java.net.InetAddress.getLocalHost;
+
 /**
  *
  * @author Alex
  */
 public class SipClient extends JFrame implements SipListener {
 
-
+    static  int zmienna=0;
     // Objects used to communicate to the JAIN SIP API.
     SipFactory sipFactory;          // Used to access the SIP API.
     SipStack sipStack;              // The SIP stack.
@@ -161,7 +163,7 @@ public class SipClient extends JFrame implements SipListener {
 
         try {
             // Get the local IP address.
-           // this.ip = InetAddress.getLocalHost().getHostAddress();
+            // this.ip = InetAddress.getLocalHost().getHostAddress();
             // Create the SIP factory and set the path name.
             this.sipFactory = SipFactory.getInstance();
             this.sipFactory.setPathName("gov.nist");
@@ -183,7 +185,7 @@ public class SipClient extends JFrame implements SipListener {
             // Add our application as a SIP listener.
             this.sipProvider.addSipListener(this);
             // Create the contact address used for all SIP messages.
-            this.contactAddress = this.addressFactory.createAddress("sip:" + this.ip + ":" + this.port);
+            this.contactAddress = this.addressFactory.createAddress("sip:nickname@" + this.ip + ":" + this.port);
             // Create the contact header used for all SIP messages.
             this.contactHeader = this.headerFactory.createContactHeader(contactAddress);
 
@@ -245,6 +247,85 @@ public class SipClient extends JFrame implements SipListener {
                     "Request sent:\n" + request.toString() + "\n\n");
 
             System.out.println("stateless" + request.toString());
+        }
+        catch(Exception e) {
+            // If an error occurred, display the error.
+            this.textArea.append("Request sent failed: " + e.getMessage() + "\n");
+        }
+    }
+
+
+
+    private void message() {
+
+        try {
+
+            // Get the destination address from the text field.
+            Address addressTo = this.addressFactory.createAddress(this.textField.getText());
+            // Create the request URI for the SIP message.
+            javax.sip.address.URI requestURI = addressTo.getURI();
+
+            // Create the SIP message headers.
+
+            // The "Via" headers.
+            ArrayList viaHeaders = new ArrayList();
+            ViaHeader viaHeader = this.headerFactory.createViaHeader(this.ip, this.port, "udp", null);
+            viaHeaders.add(viaHeader);
+            // The "Max-Forwards" header.
+            MaxForwardsHeader maxForwardsHeader = this.headerFactory.createMaxForwardsHeader(70);
+            // The "Call-Id" header.
+            CallIdHeader callIdHeader = this.sipProvider.getNewCallId();
+            // The "CSeq" header.
+            CSeqHeader cSeqHeader = this.headerFactory.createCSeqHeader(1L,"MESSAGE");
+
+            // The "From" header.
+            FromHeader fromHeader = this.headerFactory.createFromHeader(this.contactAddress, String.valueOf(this.tag));
+
+            // The "To" header.
+            ToHeader toHeader = this.headerFactory.createToHeader(addressTo, null);
+
+
+            //we are broadcasting message to whole WLAN
+
+            String adressDocelowy=  InetAddress.getLocalHost().getHostAddress();
+            adressDocelowy.split(".");
+
+            String substr = new String();
+            for(int jPort=5080;jPort<5083;++jPort)
+                for(int i=102;i<103;++i) {
+                    substr = "sip"+":"+InetAddress.getLocalHost().getHostAddress().substring(0, 10) + i + ":" + jPort;
+
+
+                    // The "To" header.
+                    toHeader = this.headerFactory.createToHeader(this.addressFactory.createAddress(substr), null);
+                    System.out.println(toHeader);
+
+
+                    // Create the REGISTER request.
+                    Request      request = this.messageFactory.createRequest(
+                            this.addressFactory.createAddress(substr).getURI(),
+                            Request.MESSAGE,
+                            callIdHeader,
+                            cSeqHeader,
+                            fromHeader,
+                            toHeader,
+                            viaHeaders,
+                            maxForwardsHeader);
+                    // Add the "Contact" header to the request.
+                    request.addHeader(contactHeader);
+                    System.out.println("via"+ this.headerFactory.createViaHeader(this.ip, this.port, "udp", null).toString());
+                    ContentTypeHeader    contentTypeHeader = headerFactory
+                            .createContentTypeHeader("text", "plain");
+                    request.setContent("send me your URI", contentTypeHeader);
+
+
+                    // Send the request statelessly through the SIP provider.
+                    this.sipProvider.sendRequest(request);
+
+                }
+
+
+
         }
         catch(Exception e) {
             // If an error occurred, display the error.
@@ -359,7 +440,7 @@ public class SipClient extends JFrame implements SipListener {
 
             // Send the request statelessly through the SIP provider.
 // this.sipProvider.sendRequest(request);
-         //   System.out.println(request);
+            //   System.out.println(request);
 // Create a new SIP client transaction.
             ClientTransaction transaction = this.sipProvider.getNewClientTransaction(request);
 // Send the request statefully, through the client transaction.
@@ -393,10 +474,10 @@ public class SipClient extends JFrame implements SipListener {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnknownHostException {
 
         port=5082;
-        ip=System.getProperty("host", "192.168.0.11");
+        ip= getLocalHost().getHostAddress();
         BasicConfigurator.configure();
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -450,10 +531,10 @@ public class SipClient extends JFrame implements SipListener {
     public void processResponse(ResponseEvent responseEvent) {
         //Dla register tez bys musial response dac
 
-
+        // System.out.println(responseEvent.getResponse().toString());
 
         // A method called when you receive a SIP request.
-        System.out.println("proces response w "+responseEvent.getClientTransaction().toString());
+        //  System.out.println("proces response w "+responseEvent.getClientTransaction().toString());
 
         try {
             Thread.sleep(100);
@@ -464,8 +545,8 @@ public class SipClient extends JFrame implements SipListener {
         Response response = responseEvent.getResponse();
         CSeqHeader cseq = (CSeqHeader) response.getHeader(CSeqHeader.NAME);
 
-        ClientTransaction tid = responseEvent.getClientTransaction();
-        System.out.println("client trans"+tid);
+
+        // System.out.println("client trans"+ responseEvent.getClientTransaction());
 
 
 // Display the response message in the text area.
@@ -477,9 +558,9 @@ public class SipClient extends JFrame implements SipListener {
 
 
 
-          //  if (isInviteResponse(responseEvent)) {
+
         if (response.getStatusCode() == Response.OK) {
-            System.out.println(cseq.getMethod());
+            //System.out.println(cseq.getMethod());
             if (cseq.getMethod().equals(Request.INVITE)) {
                 try {
 
@@ -515,7 +596,7 @@ public class SipClient extends JFrame implements SipListener {
                 }
 
             }else if(cseq.getMethod().equals(Request.BYE)){
-             //  System.out.println("wejscie do bye");
+                //  System.out.println("wejscie do bye");
                 Log.info(client2.getSocket().toString());
                 client2.endSession();
                 try {
@@ -526,10 +607,17 @@ public class SipClient extends JFrame implements SipListener {
                 dialog.delete();
 
 
+            }else if(cseq.getMethod().equals(Request.MESSAGE) ){
+
+                System.out.println(++zmienna);
+                System.out.println(responseEvent.getResponse().getHeader("To").toString());
+                System.out.println(responseEvent.getResponse().getContent().toString());
+
+
             }
         }
 
-        }
+    }
 
 
 
