@@ -11,8 +11,8 @@
       <Button fx:id="inviteId" layoutX="247.0" layoutY="361.0" mnemonicParsing="false" onAction="#onInviteClicked" text="Invite" />
       <Button fx:id="byeId" layoutX="332.0" layoutY="361.0" mnemonicParsing="false" onAction="#onByeClicked" text="Bye" />
       <Button layoutX="8.0" layoutY="42.0" mnemonicParsing="false" onAction="#onSearchClicked" prefHeight="25.0" prefWidth="200.0" text="Search network" />
-      <ListView layoutX="8.0" layoutY="86.0" prefHeight="306.0" prefWidth="200.0" />
-      <TextArea fx:id="textAreaId" layoutX="218.0" layoutY="86.0" prefHeight="198.0" prefWidth="378.0" />
+      <ListView fx:id="listViewId" layoutX="8.0" layoutY="86.0" prefHeight="306.0" prefWidth="200.0" />
+      <TextArea fx:id="textAreaId" layoutX="218.0" layoutY="86.0" prefHeight="198.0" prefWidth="371.0" />
       <TextField fx:id="textFieldId" layoutX="247.0" layoutY="323.0" prefHeight="25.0" prefWidth="190.0" />
    </children>
 </AnchorPane>

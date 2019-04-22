@@ -2,7 +2,11 @@ package src.sample;
 
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import org.apache.log4j.BasicConfigurator;
@@ -21,6 +25,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 import java.util.logging.Level;
@@ -58,10 +63,7 @@ public class Controller implements SipListener {
     Logger Log = Logger.getLogger("Controller.class");
 
     UdpP2P client1;
-    /**
-     * Creates new form SipClient
-     */
-
+    private ObservableList<String> activeUsers;
 
     @FXML
     private TextArea textAreaId;
@@ -69,6 +71,8 @@ public class Controller implements SipListener {
     @FXML
     private TextField textFieldId;
 
+    @FXML
+private ListView<String> listViewId;
 
     private void onOpen() {
         // A method called when you open your application.
@@ -104,6 +108,17 @@ public class Controller implements SipListener {
 
             // Display the local IP address and port in the text area.
             textAreaId.appendText("Local address: " + this.ip + ":" + this.port + "\n");
+
+            activeUsers= FXCollections.observableArrayList();
+
+            /*final String[] strings = {
+                    "Row 1", "Row 2", "Long Row 3", "Row 4", "Row 5", "Row 6", "Row 7",
+                    "Row 8", "Row 9", "Row 10", "Row 11", "Row 12", "Row 13", "Row 14",
+                    "Row 15", "Row 16", "Row 17", "Row 18", "Row 19", "Row 20"
+            };
+            activeUsers.addAll(strings);*/
+            listViewId.setItems(activeUsers);
+
         } catch (Exception e) {
             // If an error occurs, display an error message box and exit.
             // JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -114,7 +129,7 @@ public class Controller implements SipListener {
     }
 
     public void initialize() throws UnknownHostException {
-        port = 5082;
+        port = 5080;
         ip = getLocalHost().getHostAddress();
         onOpen();
 
@@ -194,14 +209,20 @@ public class Controller implements SipListener {
 
     }
 
-    public void onSearchClicked() {
+    public void onSearchClicked() throws InterruptedException {
 
-        Platform.runLater(new Runnable() {
+     //   activeUsers.removeAll();
+//listViewId.refresh();
+listViewId.getItems().clear();
+
+
+        new Thread(new Runnable() {
 
             @Override
             public void run() {
 
                 try {
+
 
 
                     // Create the SIP message headers.
@@ -272,11 +293,16 @@ public class Controller implements SipListener {
                 } catch (Exception e) {
                     // If an error occurred, display the error.
 
-                    textAreaId.appendText("Request sent failed: " + e.getMessage() + "\n");
+                   Platform.runLater(new Runnable() {
+                       @Override
+                       public void run() {
+                           textAreaId.appendText("Request sent failed: " + e.getMessage() + "\n");
+                       }
+                   });
                 }
 
             }
-        });
+        }).start();
 
 
 
@@ -298,6 +324,8 @@ public class Controller implements SipListener {
             }
 
             // Update the SIP message table.
+
+            textAreaId.appendText(request.toString());
      //       this.updateTable(requestEvent, request, transaction);
 
             // Process the request and send a response.
@@ -480,8 +508,28 @@ public class Controller implements SipListener {
 
                 System.out.println(++zmienna);
                 System.out.println(responseEvent.getResponse().getHeader("To").toString());
-                System.out.println(responseEvent.getResponse().getContent().toString());
 
+                // String to be scanned to find the pattern.
+                String pattern = "(sip:\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d{1,5})";
+
+                // Create a Pattern object
+                Pattern r = Pattern.compile(pattern);
+
+                // Now create matcher object.
+                Matcher m = r.matcher(responseEvent.getResponse().getHeader("To").toString());
+                if (m.find( )) {
+                    System.out.println("Found value: " + m.group(0) );
+
+Platform.runLater(new Runnable() {
+    @Override
+    public void run() {
+        activeUsers.add(m.group(0));
+    }
+});
+//listViewId.setItems(activeUsers);
+                }else {
+                    System.out.println("NO MATCH");
+                }
 
             }
         }
