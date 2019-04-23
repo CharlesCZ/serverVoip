@@ -102,7 +102,7 @@ private ListView<String> listViewId;
             // Add our application as a SIP listener.
             this.sipProvider.addSipListener(this);
             // Create the contact address used for all SIP messages.
-            this.contactAddress = this.addressFactory.createAddress("sip:" + this.ip + ":" + this.port);
+            this.contactAddress = this.addressFactory.createAddress("sip:cezar@" + this.ip + ":" + this.port);
             // Create the contact header used for all SIP messages.
             this.contactHeader = this.headerFactory.createContactHeader(contactAddress);
 
@@ -403,8 +403,12 @@ listViewId.getItems().clear();
             }
             else if(request.getMethod().equals("MESSAGE")){
                 response = this.messageFactory.createResponse(200, request);
-                ((ToHeader)response.getHeader("To")).setTag(String.valueOf(this.tag));
+                // The "To" header.
+                ToHeader toHeader = headerFactory.createToHeader(contactHeader.getAddress(), remoteTag);
+                response.setHeader(toHeader);
+
                 response.addHeader(this.contactHeader);
+
 
                 ContentTypeHeader   contentTypeHeader = headerFactory
                         .createContentTypeHeader("text", "plain");
@@ -510,7 +514,7 @@ listViewId.getItems().clear();
                 System.out.println(responseEvent.getResponse().getHeader("To").toString());
 
                 // String to be scanned to find the pattern.
-                String pattern = "(sip:\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d{1,5})";
+                String pattern = "(sip:[A-Za-z0-9]*@\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d{1,5})";
 
                 // Create a Pattern object
                 Pattern r = Pattern.compile(pattern);
