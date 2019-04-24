@@ -1,14 +1,20 @@
 package src.sample;
 
 
+
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import org.apache.log4j.BasicConfigurator;
 import src.SipClient;
 import src.udpP2P.UdpP2P;
@@ -24,6 +30,7 @@ import javax.sip.message.Response;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -39,7 +46,7 @@ public class Controller implements SipListener {
 
     static int zmienna = 0;
     // Objects used to communicate to the JAIN SIP API.
-  private   SipFactory sipFactory;          // Used to access the SIP API.
+    private   SipFactory sipFactory;          // Used to access the SIP API.
     private SipStack sipStack;              // The SIP stack.
     private SipProvider sipProvider;        // Used to send SIP messages.
     private MessageFactory messageFactory;  // Used to create SIP message factory.
@@ -56,7 +63,7 @@ public class Controller implements SipListener {
     private String remoteTag;    //The remote tag.
     Address contactAddress;         // The contact address.
     ContactHeader contactHeader;    // The contact header.
-
+    String toAdressBye;
 
     Dialog dialog; //
     UdpP2P client2;
@@ -72,7 +79,7 @@ public class Controller implements SipListener {
     private TextField textFieldId;
 
     @FXML
-private ListView<String> listViewId;
+    private ListView<String> listViewId;
 
     private void onOpen() {
         // A method called when you open your application.
@@ -129,13 +136,33 @@ private ListView<String> listViewId;
     }
 
     public void initialize() throws UnknownHostException {
-        port = 5080;
+        port = 5082;
         ip = getLocalHost().getHostAddress();
+        System.out.println("Moj adres"+ip+"  "+port);
         onOpen();
 
     }
 
+    public void initSecond(Request request, Response response, ServerTransaction transaction, Integer tag, ContactHeader contactHeader, MessageFactory messageFactory){
+        try{
+            Stage userStage = new Stage();
+            FXMLLoader loader = new FXMLLoader();
+            Pane root = (Pane) loader.load(getClass().getResource("/call.fxml").openStream());
 
+            CallController callController = (CallController) loader.getController();
+            callController.initData(request,response,transaction,tag,contactHeader,messageFactory);
+
+            Scene scene= new Scene(root);
+            userStage.setScene(scene);
+            userStage.setTitle("Connection");
+            //
+            // userStage.setResizable(false);
+            userStage.showAndWait();
+        }catch (IOException ex)
+        {
+            ex.printStackTrace();
+        }
+    }
     public void onInviteClicked() {
         // A method called when you click on the "Invite" button.
 
@@ -198,10 +225,11 @@ private ListView<String> listViewId;
     public void onByeClicked() {
         try {
             // A method called when you click on the "Bye" button.
-
-            Request request = this.dialog.createRequest("BYE");
-            ClientTransaction transaction = this.sipProvider.getNewClientTransaction(request);
-            this.dialog.sendRequest(transaction);
+            if(dialog!=null) {
+                Request request = this.dialog.createRequest("BYE");
+                ClientTransaction transaction = this.sipProvider.getNewClientTransaction(request);
+                this.dialog.sendRequest(transaction);
+            }
 
         } catch (SipException ex) {
             Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
@@ -211,9 +239,9 @@ private ListView<String> listViewId;
 
     public void onSearchClicked() throws InterruptedException {
 
-     //   activeUsers.removeAll();
+        //   activeUsers.removeAll();
 //listViewId.refresh();
-listViewId.getItems().clear();
+        listViewId.getItems().clear();
 
 
         new Thread(new Runnable() {
@@ -247,23 +275,22 @@ listViewId.getItems().clear();
                     //we are broadcasting message to whole WLAN
 
                     String adressDocelowy = InetAddress.getLocalHost().getHostAddress();
-                    adressDocelowy.split(".");
+                    String[] czescAdresu=  adressDocelowy.split("\\.");
 
-                    String substr = new String();
                     for (int jPort = 5080; jPort < 5083; ++jPort)
                         for (int i = 1; i <254; ++i) {
 
-                            String ipToSend=InetAddress.getLocalHost().getHostAddress().substring(0, 10) + i;
+                            String ipToSend=czescAdresu[0]+"."+czescAdresu[1]+"."+czescAdresu[2]+"." + i;
 
                             if(   !( (port==jPort) && (ip.equals(ipToSend)))  )
                             {
 
-                                substr = "sip" + ":" + InetAddress.getLocalHost().getHostAddress().substring(0, 10) + i + ":" + jPort;
+                                String  substr = "sip" + ":" + ipToSend + ":" + jPort;
 
 
                                 // The "To" header.
                                 ToHeader      toHeader = headerFactory.createToHeader(addressFactory.createAddress(substr), null);
-                                System.out.println(toHeader);
+                                //  System.out.println(toHeader);
 
 
                                 // Create the REGISTER request.
@@ -278,7 +305,7 @@ listViewId.getItems().clear();
                                         maxForwardsHeader);
                                 // Add the "Contact" header to the request.
                                 request.addHeader(contactHeader);
-                                System.out.println("via" + headerFactory.createViaHeader(ip, port, "udp", null).toString());
+                                //   System.out.println("via" + headerFactory.createViaHeader(ip, port, "udp", null).toString());
                                 ContentTypeHeader contentTypeHeader = headerFactory
                                         .createContentTypeHeader("text", "plain");
                                 request.setContent("send me your URI", contentTypeHeader);
@@ -293,12 +320,12 @@ listViewId.getItems().clear();
                 } catch (Exception e) {
                     // If an error occurred, display the error.
 
-                   Platform.runLater(new Runnable() {
-                       @Override
-                       public void run() {
-                           textAreaId.appendText("Request sent failed: " + e.getMessage() + "\n");
-                       }
-                   });
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            textAreaId.appendText("Request sent failed: " + e.getMessage() + "\n");
+                        }
+                    });
                 }
 
             }
@@ -310,6 +337,8 @@ listViewId.getItems().clear();
 
     @Override
     public void processRequest(RequestEvent requestEvent) {
+        System.out.println("processRequest");
+        System.out.println(requestEvent.getRequest().getMethod());
         // Get the request.
         Request request = requestEvent.getRequest();
 
@@ -326,7 +355,7 @@ listViewId.getItems().clear();
             // Update the SIP message table.
 
             textAreaId.appendText(request.toString());
-     //       this.updateTable(requestEvent, request, transaction);
+            //       this.updateTable(requestEvent, request, transaction);
 
             // Process the request and send a response.
             Response response;
@@ -349,25 +378,56 @@ listViewId.getItems().clear();
                 textAreaId.appendText(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
 
                 //czy odebrać czy nie
+// TODO: 24.04.2019 odebrac czy nie
 
 
+                class  responseTask implements Runnable{
+                    private Request request;
+                    private Response response;
+                    private ServerTransaction transaction;
+                    private MessageFactory messageFactory;
+                    private Integer tag;
+                    private ContactHeader contactHeader;
+
+                    public responseTask(Request request, Response response, ServerTransaction transaction, Integer tag, ContactHeader contactHeader, MessageFactory messageFactory){
+                        this.request=request;
+                        this.response=response;
+                        this.transaction=transaction;
+                        this.messageFactory=messageFactory;
+                        this.tag=tag;
+                        this.contactHeader=contactHeader;
+
+                    }
+
+
+                    @Override
+                    public void run() {
+
+                        initSecond(request,response,transaction,tag, contactHeader,messageFactory);
+
+                    }
+                }
+
+
+                Platform.runLater(new  responseTask(request,response,transaction,tag, contactHeader,messageFactory));
 
 
                 // If the request is an INVITE.
-                response = this.messageFactory.createResponse(200, request);
+             /*   response = this.messageFactory.createResponse(200, request);
                 ((ToHeader)response.getHeader("To")).setTag(String.valueOf(this.tag));
                 response.addHeader(this.contactHeader);
                 transaction.sendResponse(response);
-                textAreaId.appendText(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
+                textAreaId.appendText(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());*/
             }
             else if(request.getMethod().equals("ACK")) {
                 // If the request is an ACK.
+                dialog=requestEvent.getDialog();
                 client1=new UdpP2P();
                 client1.setHOST(ip);
                 client1.setPORT(port+1);
 
                 String line=request.getHeader("From").toString();
-
+                toAdressBye=line;
                 // String to be scanned to find the pattern.
                 String pattern = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d{1,5})";
 
@@ -391,13 +451,20 @@ listViewId.getItems().clear();
             }
             else if(request.getMethod().equals("BYE")) {
                 // If the request is a BYE.
+                System.out.println("weszlo do bye");
                 response = this.messageFactory.createResponse(200, request);
                 ((ToHeader)response.getHeader("To")).setTag(String.valueOf(this.tag));
                 response.addHeader(this.contactHeader);
                 transaction.sendResponse(response);
-                client1.endSession();
-                transaction.terminate();
+                if(client1!=null){
+                    client1.endSession();
+                }
 
+                if(client2!=null) {
+                    client2.endSession();
+                }
+                transaction.terminate();
+                dialog.delete();
                 textAreaId.appendText(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
 
             }
@@ -430,9 +497,9 @@ listViewId.getItems().clear();
 
     @Override
     public void processResponse(ResponseEvent responseEvent) {
-        //Dla register tez bys musial response dac
+        System.out.println("process Response");
 
-        // System.out.println(responseEvent.getResponse().toString());
+        System.out.println(responseEvent.getResponse().toString());
 
         // A method called when you receive a SIP request.
         //  System.out.println("proces response w "+responseEvent.getClientTransaction().toString());
@@ -482,9 +549,25 @@ listViewId.getItems().clear();
                             String[] URIclient2 = request.getRequestURI().toString().split(":");
                             int port2 = Integer.valueOf(URIclient2[2]);
                             String ip2 = URIclient2[1];
-                            client2.setServerHOST(ip2);
-                            client2.setServerPORT(port2 + 1);
-                            client2.init();
+
+                            // String to be scanned to find the pattern.
+                            String pattern = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})";
+
+                            Pattern r=Pattern.compile(pattern);
+
+                            Matcher m=r.matcher(ip2);
+
+                            if(m.find()) {
+                                // System.out.println("znalazlo"+m.group(0));
+
+                                client2.setServerHOST(m.group(0));
+                                client2.setServerPORT(port2 + 1);
+                                client2.init();
+                            }
+                            else{
+
+                                System.out.println("not matched");
+                            }
                         }
                     }
 
@@ -497,9 +580,17 @@ listViewId.getItems().clear();
                 }
 
             }else if(cseq.getMethod().equals(Request.BYE)){
-                //  System.out.println("wejscie do bye");
-                Log.info(client2.getSocket().toString());
-                client2.endSession();
+                System.out.println("wejscie do bye");
+
+                if(client2!=null) {
+                    Log.info(client2.getSocket().toString());
+                    client2.endSession();
+                }
+
+                if(client1!=null){
+                    client1.endSession();
+                }
+
                 try {
                     responseEvent.getClientTransaction().terminate();
                 } catch (ObjectInUseException e) {
@@ -524,12 +615,12 @@ listViewId.getItems().clear();
                 if (m.find( )) {
                     System.out.println("Found value: " + m.group(0) );
 
-Platform.runLater(new Runnable() {
-    @Override
-    public void run() {
-        activeUsers.add(m.group(0));
-    }
-});
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            activeUsers.add(m.group(0));
+                        }
+                    });
 //listViewId.setItems(activeUsers);
                 }else {
                     System.out.println("NO MATCH");
