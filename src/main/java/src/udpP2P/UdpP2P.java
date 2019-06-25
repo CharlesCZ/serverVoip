@@ -87,29 +87,29 @@ Thread microphoneThread;
    public void init() throws IOException {
         InetAddress clientAddress = InetAddress.getByName(HOST);
 
-       System.out.println("tu zawsze wywala");
+     //  System.out.println("tu zawsze wywala");
        System.out.println(PORT+"    "+clientAddress);
         socket = new DatagramSocket(PORT,clientAddress); //Otwarcie gniazda
 
 socket.connect(InetAddress.getByName(serverHOST),serverPORT);
-        System.out.println(socket.getPort()+" "+socket.getInetAddress());
+    //    System.out.println(socket.getPort()+" "+socket.getInetAddress());
         //Reads data received from server
        speakerThread= new Thread(new Runnable() {
             @Override
             public void run() {
                 if (speaker.open()) {
                     speaker.start();
-               // System.out.println("socket status speak "+socket.isConnected());
+                System.out.println("socket status speak "+socket.isConnected());
                     while (socket.isConnected()) {
                         try {
                             byte[] buffer = new byte[speaker.getBufferSize() / 5];
                             DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
                              socket.receive(receivedPacket);
                           //  System.out.println(receivedPacket.getPort());
-                             if(receivedPacket.getPort()!=PORT) {
+                          //   if(receivedPacket.getPort()!=PORT) {
                                  int read = receivedPacket.getLength();
                                  speaker.write(buffer, 0, read);
-                             }
+                         //    }
                         } catch (IOException e) {
                             System.err.println("Could not read data from server:" + e.getMessage());
                         }
@@ -119,14 +119,14 @@ socket.connect(InetAddress.getByName(serverHOST),serverPORT);
         });
        speakerThread.start();
 
-        System.out.println("miedzy");
+     //   System.out.println("miedzy");
         //Sends data to server
         microphoneThread=new Thread(new Runnable() {
             @Override
             public void run() {
                 if (microphone.open()) {
                     microphone.start();
-                 ////   System.out.println("socket status  mic"+socket.isConnected());
+               //   System.out.println("socket status  mic"+socket.isConnected());
                   //  System.out.println(socket.getPort()+" "+socket.getInetAddress());
                     while (socket.isConnected()) {
                         try {

@@ -10,12 +10,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import org.apache.log4j.BasicConfigurator;
 import src.SipClient;
 import src.udpP2P.UdpP2P;
 
@@ -30,9 +28,7 @@ import javax.sip.message.Response;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 import java.util.logging.Level;
@@ -70,6 +66,7 @@ public class Controller implements SipListener {
     Logger Log = Logger.getLogger("Controller.class");
 
     UdpP2P client1;
+    String sipNick;
     private ObservableList<String> activeUsers;
 
     @FXML
@@ -109,7 +106,7 @@ public class Controller implements SipListener {
             // Add our application as a SIP listener.
             this.sipProvider.addSipListener(this);
             // Create the contact address used for all SIP messages.
-            this.contactAddress = this.addressFactory.createAddress("sip:cezar@" + this.ip + ":" + this.port);
+            this.contactAddress = this.addressFactory.createAddress("sip:"+sipNick+"@" + this.ip + ":" + this.port);
             // Create the contact header used for all SIP messages.
             this.contactHeader = this.headerFactory.createContactHeader(contactAddress);
 
@@ -131,9 +128,11 @@ public class Controller implements SipListener {
     }
 
     public void initialize() throws UnknownHostException {
+
+        sipNick="cezary";
         port = 5080;
         ip = getLocalHost().getHostAddress();
-        System.out.println("Moj adres"+ip+"  "+port);
+        System.out.println("Moj adres"+sipNick+" "+ip+"  "+port);
         onOpen();
 
     }
@@ -234,7 +233,7 @@ public class Controller implements SipListener {
 
     public void onSearchClicked() throws InterruptedException {
 
-        //   activeUsers.removeAll();
+          activeUsers.removeAll();
 //listViewId.refresh();
         listViewId.getItems().clear();
 
@@ -332,6 +331,7 @@ public class Controller implements SipListener {
 
     @Override
     public void processRequest(RequestEvent requestEvent) {
+        System.out.println("requestyy");
         System.out.println("processRequest");
         System.out.println(requestEvent.getRequest().getMethod());
         // Get the request.
@@ -373,9 +373,6 @@ public class Controller implements SipListener {
                 textAreaId.appendText(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
 
                 //czy odebrać czy nie
-// TODO: 24.04.2019 odebrac czy nie
-
-
                 class  responseTask implements Runnable{
                     private Request request;
                     private Response response;
@@ -575,7 +572,7 @@ public class Controller implements SipListener {
                 }
 
             }else if(cseq.getMethod().equals(Request.BYE)){
-                System.out.println("wejscie do bye");
+               // System.out.println("wejscie do bye");
 
                 if(client2!=null) {
                     Log.info(client2.getSocket().toString());
@@ -610,12 +607,16 @@ public class Controller implements SipListener {
                 if (m.find( )) {
                     System.out.println("Found value: " + m.group(0) );
 
-                    Platform.runLater(new Runnable() {
+                  /*  Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
                             activeUsers.add(m.group(0));
                         }
-                    });
+                    });*/
+
+                        activeUsers.add(m.group(0));
+                        listViewId.setItems(activeUsers);
+                        listViewId.refresh();
                 }else {
                     System.out.println("NO MATCH");
                 }
