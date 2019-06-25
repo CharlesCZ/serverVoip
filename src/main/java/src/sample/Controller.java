@@ -6,14 +6,18 @@ package src.sample;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import src.model.User;
 import src.udpP2P.UdpP2P;
 
 import javax.sip.*;
@@ -66,6 +70,16 @@ public class Controller implements SipListener {
 
     UdpP2P client1;
     String sipNick;
+    private User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     private ObservableList<String> activeUsers;
 
     @FXML
@@ -126,15 +140,45 @@ public class Controller implements SipListener {
         }
     }
 
-    public void initialize() throws UnknownHostException {
 
-        sipNick="cezary";
+
+
+    public void create() throws UnknownHostException {
+
+        sipNick=user.getLogin();
         port = 5080;
         ip = getLocalHost().getHostAddress();
         System.out.println("Moj adres"+sipNick+" "+ip+"  "+port);
         onOpen();
 
     }
+
+    @FXML
+    public void signOutAction(ActionEvent event)  {
+        try {
+
+sipStack.stop();
+sipFactory.resetFactory();
+            if(client1!=null){
+                client1.endSession();
+            }
+
+            if(client2!=null) {
+                client2.endSession();
+            }
+            ((Node)event.getSource()).getScene().getWindow().hide();
+            Stage primaryStage= new Stage();
+            Parent root = FXMLLoader.load(getClass().getResource("/login.fxml"));
+            primaryStage.setTitle("voip");
+            primaryStage.setScene(new Scene(root, 800, 500));
+            primaryStage.show();
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void initSecond(Request request, Response response, ServerTransaction transaction, Integer tag, ContactHeader contactHeader, MessageFactory messageFactory){
         try{

@@ -14,5 +14,6 @@
       <ListView fx:id="listViewId" layoutX="8.0" layoutY="86.0" prefHeight="306.0" prefWidth="200.0" />
       <TextArea fx:id="textAreaId" layoutX="218.0" layoutY="86.0" prefHeight="198.0" prefWidth="371.0" />
       <TextField fx:id="textFieldId" layoutX="247.0" layoutY="323.0" prefHeight="25.0" prefWidth="190.0" />
+      <Button fx:id="signOutBtn" layoutX="300.0" layoutY="11.0" mnemonicParsing="false" onAction="#signOutAction" prefHeight="44.0" prefWidth="107.0" text="Sign out" />
    </children>
 </AnchorPane>

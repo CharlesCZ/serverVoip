@@ -18,6 +18,12 @@
 
     <dependencies>
 
+        <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.7.2</version>
+        </dependency>
 
 
         <!-- https://mvnrepository.com/artifact/javax.sip/jain-sip-ri -->
