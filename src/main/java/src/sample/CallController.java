@@ -5,7 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
-import src.SipClient;
+
 
 import javax.sip.*;
 import javax.sip.header.ContactHeader;
@@ -102,7 +102,7 @@ this.sipProvider=sipProvider;
             }
 
         } catch (SipException ex) {
-            Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CallController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
 

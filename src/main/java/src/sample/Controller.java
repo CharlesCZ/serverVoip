@@ -14,7 +14,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import src.SipClient;
 import src.udpP2P.UdpP2P;
 
 import javax.sip.*;
@@ -226,7 +225,7 @@ public class Controller implements SipListener {
             }
 
         } catch (SipException ex) {
-            Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -564,9 +563,9 @@ public class Controller implements SipListener {
                     }
 
                 } catch (InvalidArgumentException ex) {
-                    Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (SipException ex) {
-                    Logger.getLogger(SipClient.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
