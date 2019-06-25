@@ -699,7 +699,7 @@ sipFactory.resetFactory();
    // afterMainController.setUser(user);
     afterMainController.create(user);
     primaryStage.setTitle("connection history");
-    primaryStage.setScene(new Scene(root, 800, 500));
+    primaryStage.setScene(new Scene(root));
     primaryStage.show();
     }
 
