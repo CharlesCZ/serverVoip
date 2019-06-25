@@ -106,10 +106,10 @@ socket.connect(InetAddress.getByName(serverHOST),serverPORT);
                             DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
                              socket.receive(receivedPacket);
                           //  System.out.println(receivedPacket.getPort());
-                          //   if(receivedPacket.getPort()!=PORT) {
+
                                  int read = receivedPacket.getLength();
                                  speaker.write(buffer, 0, read);
-                         //    }
+
                         } catch (IOException e) {
                             System.err.println("Could not read data from server:" + e.getMessage());
                         }
@@ -169,59 +169,7 @@ public void endSession(){
 }
 
 
-    static void initClient1() throws IOException {
-        UdpP2P client=new UdpP2P();
-        client.setHOST(System.getProperty("host", "192.168.0.11"));
-        client.setPORT(Integer.parseInt(System.getProperty("port", "5081")));
-        client.setServerHOST(System.getProperty("serverhost", "192.168.0.13"));
-        client.setServerPORT(Integer.parseInt(System.getProperty("port", "5080")));
-        client.init();
 
-    }
-
-    static  void initClient2() throws IOException {
-        UdpP2P client=new UdpP2P();
-        client.setHOST(System.getProperty("host", "192.168.0.13"));
-        client.setPORT(Integer.parseInt(System.getProperty("port", "5080")));
-        client.setServerHOST(System.getProperty("serverhost", "192.168.0.11"));
-        client.setServerPORT(Integer.parseInt(System.getProperty("port", "5081")));
-        client.init();
-
-    }
-
-
-
-    static void initClient3() throws IOException {
-        UdpP2P client=new UdpP2P();
-        client.setHOST(System.getProperty("host", "192.168.0.11"));
-        client.setPORT(Integer.parseInt(System.getProperty("port", "5081")));
-        client.setServerHOST(System.getProperty("serverhost", "192.168.0.11"));
-        client.setServerPORT(Integer.parseInt(System.getProperty("port", "5080")));
-        client.init();
-    }
-
-
-    static void initClient4() throws IOException {
-        UdpP2P client=new UdpP2P();
-        client.setHOST(System.getProperty("host", "192.168.0.11"));
-        client.setPORT(Integer.parseInt(System.getProperty("port", "5080")));
-        client.setServerHOST(System.getProperty("serverhost", "192.168.0.11"));
-        client.setServerPORT(Integer.parseInt(System.getProperty("port", "5081")));
-        client.init();
-    }
-    public static void main(String[] args) throws IOException, UnknownHostException {
-
-        initClient1();
-        //initClient2();
-//initClient3();
-      // initClient4();
-
-
-        while (true);
-
-
-
-    }
 
 
 }

@@ -144,7 +144,7 @@ public class Controller implements SipListener {
             Pane root = (Pane) loader.load(getClass().getResource("/call.fxml").openStream());
 
             CallController callController = (CallController) loader.getController();
-            callController.initData(request,response,transaction,tag,contactHeader,messageFactory);
+            callController.initData(request,response,transaction,tag,contactHeader,messageFactory,dialog,sipProvider);
 
             Scene scene= new Scene(root);
             userStage.setScene(scene);
@@ -607,16 +607,16 @@ public class Controller implements SipListener {
                 if (m.find( )) {
                     System.out.println("Found value: " + m.group(0) );
 
-                  /*  Platform.runLater(new Runnable() {
+                    Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
                             activeUsers.add(m.group(0));
+                            listViewId.setItems(activeUsers);
+                            listViewId.refresh();
                         }
-                    });*/
+                    });
 
-                        activeUsers.add(m.group(0));
-                        listViewId.setItems(activeUsers);
-                        listViewId.refresh();
+
                 }else {
                     System.out.println("NO MATCH");
                 }
