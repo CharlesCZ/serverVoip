@@ -17,6 +17,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import src.model.HistoryConnection;
 import src.model.User;
 import src.udpP2P.UdpP2P;
 
@@ -31,6 +32,8 @@ import javax.sip.message.Response;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
@@ -71,7 +74,7 @@ public class Controller implements SipListener {
     UdpP2P client1;
     String sipNick;
     private User user;
-
+private HistoryConnection historyConnection;
     public User getUser() {
         return user;
     }
@@ -146,6 +149,8 @@ public class Controller implements SipListener {
     public void create() throws UnknownHostException {
 
         sipNick=user.getLogin();
+        historyConnection=new HistoryConnection();
+        historyConnection.setIdUser(user.getId());
         port = 5080;
         ip = getLocalHost().getHostAddress();
         System.out.println("Moj adres"+sipNick+" "+ip+"  "+port);
@@ -187,7 +192,7 @@ sipFactory.resetFactory();
             Pane root = (Pane) loader.load(getClass().getResource("/call.fxml").openStream());
 
             CallController callController = (CallController) loader.getController();
-            callController.initData(request,response,transaction,tag,contactHeader,messageFactory,dialog,sipProvider);
+            callController.initData(request,response,transaction,tag,contactHeader,messageFactory,dialog,sipProvider,historyConnection);
 
             Scene scene= new Scene(root);
             userStage.setScene(scene);
@@ -252,6 +257,10 @@ sipFactory.resetFactory();
             // Display the message in the text area.
             this.textAreaId.appendText(
                     "Request sent:\n" + request.toString() + "\n\n");
+
+            historyConnection.setUriSender("sip:"+sipNick+"@"+ip+":"+port);
+            historyConnection.setUriInvited(addressTo.toString());
+            historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
         } catch (Exception e) {
             // If an error occurred, display the error.
             this.textAreaId.appendText("Request sent failed: " + e.getMessage() + "\n");
@@ -406,6 +415,18 @@ sipFactory.resetFactory();
                 textAreaId.appendText(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
             }
             else if(request.getMethod().equals("INVITE")) {
+
+                // String to be scanned to find the pattern.
+                String pattern = "(sip:[A-Za-z0-9]*@\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d{1,5})";
+                // Create a Pattern object
+                Pattern r = Pattern.compile(pattern);
+                // Now create matcher object.
+                Matcher m = r.matcher(request.getHeader("From").toString());
+                if (m.find( )) {
+                    historyConnection.setUriSender(m.group(0));
+                }
+                historyConnection.setUriInvited("sip:"+sipNick+"@"+ip+":"+port);
+                historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
 
 
                 //trying or not
@@ -669,6 +690,19 @@ sipFactory.resetFactory();
 
     }
 
+@FXML
+    public void showHistoryAction(ActionEvent event) throws IOException {
+    Stage primaryStage= new Stage();
+    FXMLLoader loader=new FXMLLoader();
+    Parent root = loader.load(getClass().getResource("/history.fxml").openStream());
+    HistoryController afterMainController=(HistoryController) loader.getController();
+   // afterMainController.setUser(user);
+    afterMainController.create(user);
+    primaryStage.setTitle("connection history");
+    primaryStage.setScene(new Scene(root, 800, 500));
+    primaryStage.show();
+    }
+
     @Override
     public void processTimeout(TimeoutEvent timeoutEvent) {
 
@@ -688,4 +722,6 @@ sipFactory.resetFactory();
     public void processDialogTerminated(DialogTerminatedEvent dialogTerminatedEvent) {
 
     }
+
+
 }

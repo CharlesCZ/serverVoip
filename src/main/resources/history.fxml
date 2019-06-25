@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<TableView fx:id="tableViewId" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="423.0" prefWidth="719.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="src.sample.HistoryController">
+  <columns>
+    <TableColumn fx:id="columnId" prefWidth="75.0" text="id" >
+        <cellValueFactory><PropertyValueFactory property="idCon" />
+        </cellValueFactory>
+    </TableColumn>
+    <TableColumn fx:id="columnUser_Id" prefWidth="75.0" text="user_id" >
+        <cellValueFactory><PropertyValueFactory property="idUser" />
+        </cellValueFactory>
+    </TableColumn>
+      <TableColumn fx:id="columnUri_sender" prefWidth="175.0" text="uri_sender" >
+      <cellValueFactory><PropertyValueFactory property="uriSender" />
+      </cellValueFactory>
+      </TableColumn>
+      <TableColumn fx:id="columnUri_inviter" prefWidth="147.0" text="uri_inviter" >
+      <cellValueFactory><PropertyValueFactory property="uriInvited" />
+      </cellValueFactory>
+  </TableColumn>
+      <TableColumn fx:id="columnBegin_date" prefWidth="118.0" text="begin_date" >
+      <cellValueFactory><PropertyValueFactory property="beginDate" />
+      </cellValueFactory>
+  </TableColumn>
+      <TableColumn fx:id="columnEnd_date" prefWidth="110.0" text="end_date" >
+          <cellValueFactory><PropertyValueFactory property="endDate" />
+          </cellValueFactory>
+      </TableColumn>
+  </columns>
+</TableView>

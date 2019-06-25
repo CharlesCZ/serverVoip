@@ -1,17 +1,20 @@
 package src.model;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class HistoryConnection {
    private int idCon;
    private int idUser;
    private String uriSender;
    private String uriInvited;
-   private Date beginDate;
-   private Date endDate;
+   private Timestamp beginDate;
+   private Timestamp endDate;
 
+    public HistoryConnection() {
+    }
 
-    public HistoryConnection(int idCon, int idUser, String uriSender, String uriInvited, Date beginDate, Date endDate) {
+    public HistoryConnection(int idCon, int idUser, String uriSender, String uriInvited, Timestamp beginDate, Timestamp endDate) {
         this.idCon = idCon;
         this.idUser = idUser;
         this.uriSender = uriSender;
@@ -52,19 +55,31 @@ public class HistoryConnection {
         this.uriInvited = uriInvited;
     }
 
-    public Date getBeginDate() {
+    public Timestamp getBeginDate() {
         return beginDate;
     }
 
-    public void setBeginDate(Date beginDate) {
+    public void setBeginDate(Timestamp beginDate) {
         this.beginDate = beginDate;
     }
 
-    public Date getEndDate() {
+    public Timestamp getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(Timestamp endDate) {
         this.endDate = endDate;
+    }
+
+    @Override
+    public String toString() {
+        return "HistoryConnection{" +
+                "idCon=" + idCon +
+                ", idUser=" + idUser +
+                ", uriSender='" + uriSender + '\'' +
+                ", uriInvited='" + uriInvited + '\'' +
+                ", beginDate=" + beginDate +
+                ", endDate=" + endDate +
+                '}';
     }
 }

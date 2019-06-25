@@ -61,23 +61,27 @@ public class DatabaseVoip {
             System.err.println("Blad przy wstawianiu uzytkownika");
             e.printStackTrace();
             return false;
+        }finally {
+            closeConnection();
         }
         return true;
     }
 
 
-    public boolean insertHistoryConnection(int userId, String uriSender, String uriInvited, Date beginDate, Date endDate) {
+    public boolean insertHistoryConnection(HistoryConnection historyConnection) {
         try {
             PreparedStatement prepStmt = conn.prepareStatement("insert into history_connections values (NULL,?,?,?,?,?);");
-            prepStmt.setInt(1, userId);
-            prepStmt.setString(2, uriSender);
-            prepStmt.setString(3, uriInvited);
-            prepStmt.setDate(4, beginDate);
-            prepStmt.setDate(5, endDate);
+            prepStmt.setInt(1, historyConnection.getIdUser());
+            prepStmt.setString(2, historyConnection.getUriSender());
+            prepStmt.setString(3, historyConnection.getUriInvited());
+            prepStmt.setTimestamp(4, historyConnection.getBeginDate());
+            prepStmt.setTimestamp(5, historyConnection.getEndDate());
             prepStmt.execute();
         } catch (SQLException e) {
             System.err.println("Blad przy dodawaniu do historii");
             return false;
+        }finally {
+            closeConnection();
         }
         return true;
     }
@@ -98,6 +102,8 @@ public class DatabaseVoip {
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }finally {
+            closeConnection();
         }
         return usersList;
     }
@@ -123,12 +129,47 @@ public class DatabaseVoip {
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }finally {
+            closeConnection();
         }
         return null;
     }
 
 
+    public List<HistoryConnection> selectHistoryConnectionByUserId(int userId) {
 
+        List<HistoryConnection> historyConnections = new LinkedList<>();
+        try {
+            String query="SELECT * FROM history_connections WHERE id_user=?";
+            PreparedStatement prepStmt=conn.prepareStatement(query);
+            prepStmt.setInt(1,userId);
+            ResultSet resultSet = prepStmt.executeQuery();
+            int idCon;
+            int idUser;
+            String uriSender;
+            String uriInvited;
+            Timestamp beginDate;
+            Timestamp endDate;
+            while (resultSet.next()) {
+                idCon = resultSet.getInt("id_con");
+                idUser = resultSet.getInt("id_user");
+                uriSender = resultSet.getString("uri_sender");
+                uriInvited = resultSet.getString("uri_invited");
+                beginDate = resultSet.getTimestamp("begin_date");
+                endDate = resultSet.getTimestamp("end_date");
+                historyConnections.add(new HistoryConnection(idCon,idUser,uriSender,uriInvited,beginDate,endDate));
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }finally {
+            closeConnection();
+        }
+
+        return historyConnections;
+
+    }
 
     public List<HistoryConnection> selectHistoryConnection() {
         List<HistoryConnection> historyConnections = new LinkedList<>();
@@ -138,21 +179,23 @@ public class DatabaseVoip {
             int idUser;
             String uriSender;
             String uriInvited;
-            Date beginDate;
-            Date endDate;
+            Timestamp beginDate;
+            Timestamp endDate;
             while (resultSet.next()) {
                 idCon = resultSet.getInt("id_con");
                 idUser = resultSet.getInt("id_user");
                 uriSender = resultSet.getString("uri_sender");
                 uriInvited = resultSet.getString("uri_invited");
-                beginDate = resultSet.getDate("begin_date");
-                endDate = resultSet.getDate("end_date");
+                beginDate = resultSet.getTimestamp("begin_date");
+                endDate = resultSet.getTimestamp("end_date");
                 historyConnections.add(new HistoryConnection(idCon,idUser,uriSender,uriInvited,beginDate,endDate));
 
             }
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }finally {
+            closeConnection();
         }
 
         return historyConnections;

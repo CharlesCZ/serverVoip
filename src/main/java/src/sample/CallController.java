@@ -5,6 +5,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import src.model.DatabaseVoip;
+import src.model.HistoryConnection;
 
 
 import javax.sip.*;
@@ -13,6 +15,7 @@ import javax.sip.header.ToHeader;
 import javax.sip.message.MessageFactory;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,7 +49,8 @@ public class CallController {
 
    private Dialog dialog;
     private SipProvider sipProvider;        // Used to send SIP messages.
-    public void initData(Request request, Response response, ServerTransaction transaction, Integer tag, ContactHeader contactHeader, MessageFactory messageFactory, Dialog dialog,SipProvider sipProvider){
+    private HistoryConnection historyConnection;
+    public void initData(Request request, Response response, ServerTransaction transaction, Integer tag, ContactHeader contactHeader, MessageFactory messageFactory, Dialog dialog, SipProvider sipProvider, HistoryConnection historyConnection){
 this.request=request;
 this.response=response;
 this.transaction=transaction;
@@ -67,7 +71,7 @@ this.sipProvider=sipProvider;
             label.setText(m.group(0));
         }
 
-
+this.historyConnection=historyConnection;
     }
     @FXML
     public void onConnectAction() throws ParseException, SipException, InvalidArgumentException {
@@ -81,7 +85,7 @@ this.sipProvider=sipProvider;
         response.addHeader(this.contactHeader);
         transaction.sendResponse(response);
         System.out.println(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
-
+historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
 
         // get a handle to the stage
         Stage stage = (Stage) connectBtn.getScene().getWindow();
@@ -105,7 +109,9 @@ this.sipProvider=sipProvider;
             Logger.getLogger(CallController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-
+historyConnection.setEndDate(historyConnection.getBeginDate());
+        DatabaseVoip databaseVoip=new DatabaseVoip();
+        databaseVoip.insertHistoryConnection(historyConnection);
         // get a handle to the stage
         Stage stage = (Stage) cancelBtn.getScene().getWindow();
         // do what you have to do
