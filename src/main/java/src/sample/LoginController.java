@@ -94,9 +94,8 @@ FXMLLoader loader=new FXMLLoader();
             passwordMisMatch2.setText("Password mismatch");
             return;
         }
-
+         d=new DatabaseVoip();
         d.insertUser(registerUserFieldId.getText(),GFG.encryptThisString(registerPasswordFieldId.getText()));
-        d.closeConnection();
         statusRegisterId.setText("Account created!");
 
     }

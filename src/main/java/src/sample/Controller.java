@@ -17,6 +17,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import src.model.DatabaseVoip;
 import src.model.HistoryConnection;
 import src.model.User;
 import src.udpP2P.UdpP2P;
@@ -275,6 +276,10 @@ sipFactory.resetFactory();
                 Request request = this.dialog.createRequest("BYE");
                 ClientTransaction transaction = this.sipProvider.getNewClientTransaction(request);
                 this.dialog.sendRequest(transaction);
+                historyConnection.setEndDate(new Timestamp(System.currentTimeMillis()));
+                DatabaseVoip databaseVoip=new DatabaseVoip();
+                databaseVoip.insertHistoryConnection(historyConnection);
+
             }
 
         } catch (SipException ex) {
@@ -522,6 +527,9 @@ sipFactory.resetFactory();
                 transaction.terminate();
                 dialog.delete();
                 textAreaId.appendText(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
+                historyConnection.setEndDate(new Timestamp(System.currentTimeMillis()));
+                DatabaseVoip databaseVoip=new DatabaseVoip();
+                databaseVoip.insertHistoryConnection(historyConnection);
 
             }
             else if(request.getMethod().equals("MESSAGE")){
