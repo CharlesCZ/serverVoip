@@ -2,6 +2,8 @@ package src.sample;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
@@ -15,6 +17,7 @@ import javax.sip.header.ToHeader;
 import javax.sip.message.MessageFactory;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.logging.Level;
@@ -87,6 +90,8 @@ this.historyConnection=historyConnection;
         System.out.println(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
 historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
 
+
+        ControllerManager.controller.setInfoInTextAreaId(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
         // get a handle to the stage
         Stage stage = (Stage) connectBtn.getScene().getWindow();
         // do what you have to do
@@ -109,8 +114,7 @@ historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
                 System.out.println(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
 
 
-
-
+         ControllerManager.controller.setInfoInTextAreaId(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
         } catch (SipException ex) {
             Logger.getLogger(CallController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidArgumentException e) {

@@ -95,6 +95,13 @@ private HistoryConnection historyConnection;
     @FXML
     private ListView<String> listViewId;
 
+
+    public void setInfoInTextAreaId(String info){
+
+        textAreaId.appendText(info);
+    }
+
+
     private void onOpen() {
         // A method called when you open your application.
 
