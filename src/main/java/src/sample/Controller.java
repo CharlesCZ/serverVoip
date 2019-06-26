@@ -30,6 +30,7 @@ import javax.sip.header.*;
 import javax.sip.message.MessageFactory;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -208,7 +209,7 @@ sipFactory.resetFactory();
             //
             // userStage.setResizable(false);
             userStage.showAndWait();
-        }catch (IOException ex)
+        }catch (IOException | UnsupportedAudioFileException ex)
         {
             ex.printStackTrace();
         }
@@ -343,7 +344,7 @@ sipFactory.resetFactory();
                     String adressDocelowy = InetAddress.getLocalHost().getHostAddress();
                     String[] czescAdresu=  adressDocelowy.split("\\.");
 
-                    for (int jPort = 5080; jPort < 5083; ++jPort)
+                    for (int jPort = 5080; jPort < 5081; ++jPort)
                         for (int i = 1; i <254; ++i) {
 
                             String ipToSend=czescAdresu[0]+"."+czescAdresu[1]+"."+czescAdresu[2]+"." + i;
@@ -653,9 +654,7 @@ sipFactory.resetFactory();
                         }
                     }
 
-                } catch (InvalidArgumentException ex) {
-                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (SipException ex) {
+                } catch (InvalidArgumentException | SipException ex) {
                     Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException e) {
                     e.printStackTrace();

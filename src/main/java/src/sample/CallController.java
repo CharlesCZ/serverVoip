@@ -17,9 +17,12 @@ import javax.sip.header.ToHeader;
 import javax.sip.message.MessageFactory;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -53,7 +56,13 @@ public class CallController {
    private Dialog dialog;
     private SipProvider sipProvider;        // Used to send SIP messages.
     private HistoryConnection historyConnection;
-    public void initData(Request request, Response response, ServerTransaction transaction, Integer tag, ContactHeader contactHeader, MessageFactory messageFactory, Dialog dialog, SipProvider sipProvider, HistoryConnection historyConnection){
+
+    private SimpleAudioPlayer  audioPlayer;
+
+    private  Thread thread;
+
+    AtomicBoolean flagOfRingTone;
+    public void initData(Request request, Response response, ServerTransaction transaction, Integer tag, ContactHeader contactHeader, MessageFactory messageFactory, Dialog dialog, SipProvider sipProvider, HistoryConnection historyConnection) throws UnsupportedAudioFileException, IOException {
 this.request=request;
 this.response=response;
 this.transaction=transaction;
@@ -75,9 +84,42 @@ this.sipProvider=sipProvider;
         }
 
 this.historyConnection=historyConnection;
+
+flagOfRingTone=new AtomicBoolean(true);
+
+        String projectPath=System.getProperty("user.dir");
+        System.setProperty("ring.tone", projectPath + "/telephone-ring-04.wav");
+        SimpleAudioPlayer.filePath = System.getProperty("ring.tone");
+        try {
+            audioPlayer =
+                    new SimpleAudioPlayer();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+
+        thread=new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (flagOfRingTone.get()) {
+                    audioPlayer.play();
+                }
+                try {
+                    audioPlayer.stop();
+                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+        });
+       thread.start();
+
+
     }
     @FXML
     public void onConnectAction() throws ParseException, SipException, InvalidArgumentException {
+      flagOfRingTone.set(false);
+        thread.interrupt();
         // If the request is an INVITE.
         response = this.messageFactory.createResponse(200, request);
         ((ToHeader)response.getHeader("To")).setTag(String.valueOf(this.tag));
@@ -96,12 +138,14 @@ historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
         Stage stage = (Stage) connectBtn.getScene().getWindow();
         // do what you have to do
         stage.close();
+
     }
 
 
     @FXML
     public void onCancelAction(){
-
+        flagOfRingTone.set(false);
+        thread.interrupt();
         try {
             // A method called when you click on the "Bye" button.
 
@@ -117,9 +161,7 @@ historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
          ControllerManager.controller.setInfoInTextAreaId(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
         } catch (SipException ex) {
             Logger.getLogger(CallController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidArgumentException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (InvalidArgumentException | ParseException e) {
             e.printStackTrace();
         }
 
@@ -130,6 +172,7 @@ historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
         Stage stage = (Stage) cancelBtn.getScene().getWindow();
         // do what you have to do
         stage.close();
+
 
     }
 }
