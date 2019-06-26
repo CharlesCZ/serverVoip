@@ -34,9 +34,6 @@ public class HistoryController {
         DatabaseVoip d=new DatabaseVoip();
     final ObservableList<HistoryConnection> data=  FXCollections.observableArrayList(d.selectHistoryConnectionByUserId(user.getId()));
 tableViewId.setItems(data);
-//tableViewId.getItems().set
-        System.out.println(tableViewId.getItems().get(0));
-
 tableViewId.refresh();
 
     }
