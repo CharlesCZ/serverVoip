@@ -128,7 +128,7 @@ private HistoryConnection historyConnection;
             this.contactHeader = this.headerFactory.createContactHeader(contactAddress);
 
             // Display the local IP address and port in the text area.
-            textAreaId.appendText("Local address: " + this.ip + ":" + this.port + "\n");
+            textAreaId.appendText("Local address: sip:"+sipNick+"@" + this.ip + ":" + this.port + "\n");
 
             activeUsers= FXCollections.observableArrayList();
 
@@ -280,10 +280,15 @@ sipFactory.resetFactory();
                 DatabaseVoip databaseVoip=new DatabaseVoip();
                 databaseVoip.insertHistoryConnection(historyConnection);
 
+                // Display the message in the text area.
+                this.textAreaId.appendText(
+                        "Request sent:\n" + request.toString() + "\n\n");
             }
 
         } catch (SipException ex) {
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+            // If an error occurred, display the error.
+            this.textAreaId.appendText("Request sent failed: " + ex.getMessage() + "\n");
         }
 
     }
@@ -294,6 +299,9 @@ sipFactory.resetFactory();
 //listViewId.refresh();
         listViewId.getItems().clear();
 
+        // Display the message in the text area.
+        this.textAreaId.appendText(
+                "Searching for network"+ "\n\n");
 
         new Thread(new Runnable() {
 
@@ -517,6 +525,8 @@ sipFactory.resetFactory();
                 ((ToHeader)response.getHeader("To")).setTag(String.valueOf(this.tag));
                 response.addHeader(this.contactHeader);
                 transaction.sendResponse(response);
+
+
                 if(client1!=null){
                     client1.endSession();
                 }
@@ -565,8 +575,7 @@ sipFactory.resetFactory();
 
         System.out.println(responseEvent.getResponse().toString());
 
-        // A method called when you receive a SIP request.
-        //  System.out.println("proces response w "+responseEvent.getClientTransaction().toString());
+
 
         try {
             Thread.sleep(100);
@@ -578,7 +587,6 @@ sipFactory.resetFactory();
         CSeqHeader cseq = (CSeqHeader) response.getHeader(CSeqHeader.NAME);
 
 
-        // System.out.println("client trans"+ responseEvent.getClientTransaction());
 
 
 // Display the response message in the text area.
@@ -603,6 +611,9 @@ sipFactory.resetFactory();
                             Request request = dialog.createAck(((CSeqHeader) response.getHeader("CSeq")).getSeqNumber());
                             request.addHeader(contactHeader);
                             dialog.sendAck(request);
+
+                            this.textAreaId.appendText(
+                                    "Request sent:\n" + request.toString() + "\n\n");
                             responseEvent.getClientTransaction().terminate();;
 
 
@@ -694,6 +705,10 @@ sipFactory.resetFactory();
                 }
 
             }
+        } if (response.getStatusCode() == Response.DECLINE){
+            historyConnection.setEndDate(historyConnection.getBeginDate());
+            DatabaseVoip databaseVoip=new DatabaseVoip();
+            databaseVoip.insertHistoryConnection(historyConnection);
         }
 
     }

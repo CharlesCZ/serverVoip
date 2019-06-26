@@ -99,17 +99,27 @@ historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
 
         try {
             // A method called when you click on the "Bye" button.
-            if(dialog!=null) {
-                Request request = this.dialog.createRequest("BYE");
-                ClientTransaction transaction = this.sipProvider.getNewClientTransaction(request);
-                this.dialog.sendRequest(transaction);
-            }
+
+
+
+                response = this.messageFactory.createResponse(603, request);
+                ((ToHeader)response.getHeader("To")).setTag(String.valueOf(this.tag));
+                response.addHeader(this.contactHeader);
+                transaction.sendResponse(response);
+                System.out.println(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
+
+
+
 
         } catch (SipException ex) {
             Logger.getLogger(CallController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidArgumentException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
-historyConnection.setEndDate(historyConnection.getBeginDate());
+        historyConnection.setEndDate(historyConnection.getBeginDate());
         DatabaseVoip databaseVoip=new DatabaseVoip();
         databaseVoip.insertHistoryConnection(historyConnection);
         // get a handle to the stage
