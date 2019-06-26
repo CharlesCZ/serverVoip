@@ -1,5 +1,6 @@
 package src.sample;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -72,6 +73,12 @@ FXMLLoader loader=new FXMLLoader();
         primaryStage.setTitle("voip");
         primaryStage.setScene(new Scene(root, 800, 500));
         primaryStage.show();
+
+        primaryStage.setOnCloseRequest(event1 -> {
+
+            afterLoginController.signOutAction(event);
+
+        });
 
     }
 

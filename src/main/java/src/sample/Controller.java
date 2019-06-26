@@ -186,7 +186,9 @@ sipFactory.resetFactory();
             primaryStage.setTitle("voip");
             primaryStage.setScene(new Scene(root, 800, 500));
             primaryStage.show();
-
+primaryStage.setOnCloseRequest(event1 -> {
+    Platform.exit();
+    System.exit(0);});
 
         } catch (IOException e) {
             e.printStackTrace();
