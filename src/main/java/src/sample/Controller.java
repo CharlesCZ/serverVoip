@@ -184,7 +184,7 @@ sipFactory.resetFactory();
             Stage primaryStage= new Stage();
             Parent root = FXMLLoader.load(getClass().getResource("/login.fxml"));
             primaryStage.setTitle("voip");
-            primaryStage.setScene(new Scene(root, 800, 500));
+            primaryStage.setScene(new Scene(root));
             primaryStage.show();
 primaryStage.setOnCloseRequest(event1 -> {
     Platform.exit();

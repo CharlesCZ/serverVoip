@@ -71,7 +71,7 @@ FXMLLoader loader=new FXMLLoader();
         afterLoginController.create();
         ControllerManager.controller=afterLoginController;
         primaryStage.setTitle("voip");
-        primaryStage.setScene(new Scene(root, 800, 500));
+        primaryStage.setScene(new Scene(root));
         primaryStage.show();
 
         primaryStage.setOnCloseRequest(event1 -> {

@@ -14,7 +14,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("/login.fxml"));
         primaryStage.setTitle("Voip");
-        primaryStage.setScene(new Scene(root, 800, 500));
+        primaryStage.setScene(new Scene(root));
         primaryStage.show();
 
         primaryStage.setOnCloseRequest(event -> {
