@@ -105,6 +105,9 @@ FXMLLoader loader=new FXMLLoader();
          d=new DatabaseVoip();
         d.insertUser(registerUserFieldId.getText(),GFG.encryptThisString(registerPasswordFieldId.getText()));
         statusRegisterId.setText("Account created!");
+        registerUserFieldId.clear();
+        registerPasswordFieldId.clear();
+        registerConfPasswordFieldId.clear();
 
     }
 }

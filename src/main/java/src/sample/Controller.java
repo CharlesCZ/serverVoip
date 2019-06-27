@@ -4,6 +4,8 @@ package src.sample;
 
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -12,9 +14,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import src.model.DatabaseVoip;
@@ -49,6 +53,7 @@ import static java.net.InetAddress.getLocalHost;
 public class Controller implements SipListener {
 
     static int zmienna = 0;
+
     // Objects used to communicate to the JAIN SIP API.
     private   SipFactory sipFactory;          // Used to access the SIP API.
     private SipStack sipStack;              // The SIP stack.
@@ -95,8 +100,10 @@ private HistoryConnection historyConnection;
 
     @FXML
     private ListView<String> listViewId;
-
-
+    @FXML
+    private Button inviteId;
+    @FXML
+    private Button byeId;
     public void setInfoInTextAreaId(String info){
 
         textAreaId.appendText(info);
@@ -755,4 +762,29 @@ primaryStage.setOnCloseRequest(event1 -> {
     }
 
 
+    @FXML
+    public void initialize() {
+        byeId.setDisable(true);
+        inviteId.setDisable(true);
+
+        listViewId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                textFieldId.setText(newValue);
+                String text = textFieldId.getText();
+                boolean disableButtons = text.isEmpty() || text.trim().isEmpty();
+                inviteId.setDisable(disableButtons);
+                byeId.setDisable(disableButtons);
+            }
+        });
+
+    }
+
+    @FXML
+    public void handleKeyReleased(KeyEvent keyEvent) {
+        String text = textFieldId.getText();
+        boolean disableButtons = text.isEmpty() || text.trim().isEmpty();
+       inviteId.setDisable(disableButtons);
+        byeId.setDisable(disableButtons);
+    }
 }
