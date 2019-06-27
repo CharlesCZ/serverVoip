@@ -170,6 +170,7 @@ private HistoryConnection historyConnection;
         port = 5080;
         ip = getLocalHost().getHostAddress();
         System.out.println("Moj adres"+sipNick+" "+ip+"  "+port);
+
         onOpen();
 
     }
@@ -211,7 +212,7 @@ primaryStage.setOnCloseRequest(event1 -> {
 
             CallController callController = (CallController) loader.getController();
             callController.initData(request,response,transaction,tag,contactHeader,messageFactory,dialog,sipProvider,historyConnection);
-
+            ControllerManager.callController=callController;
             Scene scene= new Scene(root);
             userStage.setScene(scene);
             userStage.setTitle("Connection");
@@ -270,7 +271,8 @@ primaryStage.setOnCloseRequest(event1 -> {
 // Create a new SIP client transaction.
             ClientTransaction transaction = this.sipProvider.getNewClientTransaction(request);
 // Send the request statefully, through the client transaction.
-            transaction.sendRequest();
+            dialog=transaction.getDialog();
+            dialog.sendRequest(transaction);
 
             // Display the message in the text area.
             this.textAreaId.appendText(
@@ -554,11 +556,19 @@ primaryStage.setOnCloseRequest(event1 -> {
                     client2.endSession();
                 }
                 transaction.terminate();
+                if(dialog!=null)
                 dialog.delete();
                 textAreaId.appendText(" / SENT " + response.getStatusCode() + " " + response.getReasonPhrase());
                 historyConnection.setEndDate(new Timestamp(System.currentTimeMillis()));
                 DatabaseVoip databaseVoip=new DatabaseVoip();
                 databaseVoip.insertHistoryConnection(historyConnection);
+
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        ControllerManager.callController.stoppedByCaller();
+                    }
+                });
 
             }
             else if(request.getMethod().equals("MESSAGE")){

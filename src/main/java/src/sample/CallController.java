@@ -119,7 +119,6 @@ flagOfRingTone=new AtomicBoolean(true);
     @FXML
     public void onConnectAction() throws ParseException, SipException, InvalidArgumentException {
       flagOfRingTone.set(false);
-        thread.interrupt();
         // If the request is an INVITE.
         response = this.messageFactory.createResponse(200, request);
         ((ToHeader)response.getHeader("To")).setTag(String.valueOf(this.tag));
@@ -145,7 +144,6 @@ historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
     @FXML
     public void onCancelAction(){
         flagOfRingTone.set(false);
-        thread.interrupt();
         try {
             // A method called when you click on the "Bye" button.
 
@@ -174,5 +172,15 @@ historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
         stage.close();
 
 
+    }
+
+
+    public  void stoppedByCaller(){
+        flagOfRingTone.set(false);
+
+        // get a handle to the stage
+        Stage stage = (Stage) cancelBtn.getScene().getWindow();
+        // do what you have to do
+        stage.close();
     }
 }
