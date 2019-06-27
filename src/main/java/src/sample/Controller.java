@@ -310,6 +310,8 @@ primaryStage.setOnCloseRequest(event1 -> {
 
     }
 
+
+    @FXML
     public void onSearchClicked() throws InterruptedException {
 
           activeUsers.removeAll();
@@ -353,7 +355,7 @@ primaryStage.setOnCloseRequest(event1 -> {
                     String adressDocelowy = InetAddress.getLocalHost().getHostAddress();
                     String[] czescAdresu=  adressDocelowy.split("\\.");
 
-                    for (int jPort = 5080; jPort < 5081; ++jPort)
+                    int jPort = 5080;
                         for (int i = 1; i <254; ++i) {
 
                             String ipToSend=czescAdresu[0]+"."+czescAdresu[1]+"."+czescAdresu[2]+"." + i;
