@@ -14,6 +14,8 @@ import src.model.DatabaseVoip;
 import src.model.HistoryConnection;
 import src.model.User;
 
+import java.util.stream.Collectors;
+
 public class HistoryController {
 
     @FXML
@@ -44,7 +46,11 @@ public class HistoryController {
         columnHashId.setSortable(false);
         this.user=user;
         DatabaseVoip d=new DatabaseVoip();
-    final ObservableList<HistoryConnection> data=  FXCollections.observableArrayList(d.selectHistoryConnectionByUserId(user.getId()));
+    final ObservableList<HistoryConnection> data=  FXCollections.observableArrayList(d.selectHistoryConnectionByUserId(user.getId()).stream().map(historyConnection -> {
+        historyConnection.setUriInvited(AES.decrypt(historyConnection.getUriInvited(),AES.secretKey));
+        historyConnection.setUriSender(AES.decrypt(historyConnection.getUriSender(),AES.secretKey));
+        return historyConnection;
+    }).collect(Collectors.toList()));
 tableViewId.setItems(data);
 tableViewId.refresh();
 

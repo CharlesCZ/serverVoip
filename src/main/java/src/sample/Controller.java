@@ -278,8 +278,8 @@ primaryStage.setOnCloseRequest(event1 -> {
             this.textAreaId.appendText(
                     "Request sent:\n" + request.toString() + "\n\n");
 
-            historyConnection.setUriSender("sip:"+sipNick+"@"+ip+":"+port);
-            historyConnection.setUriInvited(addressTo.toString());
+            historyConnection.setUriSender(AES.encrypt("sip:"+sipNick+"@"+ip+":"+port,AES.secretKey));
+            historyConnection.setUriInvited(AES.encrypt(addressTo.toString(),AES.secretKey));
             historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
         } catch (Exception e) {
             // If an error occurred, display the error.
@@ -457,9 +457,9 @@ primaryStage.setOnCloseRequest(event1 -> {
                 // Now create matcher object.
                 Matcher m = r.matcher(request.getHeader("From").toString());
                 if (m.find( )) {
-                    historyConnection.setUriSender(m.group(0));
+                    historyConnection.setUriSender(AES.encrypt(m.group(0),AES.secretKey));
                 }
-                historyConnection.setUriInvited("sip:"+sipNick+"@"+ip+":"+port);
+                historyConnection.setUriInvited(AES.encrypt("sip:"+sipNick+"@"+ip+":"+port,AES.secretKey));
                 historyConnection.setBeginDate(new Timestamp(System.currentTimeMillis()));
 
 
