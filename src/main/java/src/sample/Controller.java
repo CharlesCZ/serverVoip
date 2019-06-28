@@ -562,7 +562,7 @@ primaryStage.setOnCloseRequest(event1 -> {
                 historyConnection.setEndDate(new Timestamp(System.currentTimeMillis()));
                 DatabaseVoip databaseVoip=new DatabaseVoip();
                 databaseVoip.insertHistoryConnection(historyConnection);
-
+if(ControllerManager.callController!=null)
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
@@ -776,7 +776,7 @@ primaryStage.setOnCloseRequest(event1 -> {
 
     @FXML
     public void initialize() {
-        byeId.setDisable(true);
+
         inviteId.setDisable(true);
 
         listViewId.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
@@ -786,7 +786,7 @@ primaryStage.setOnCloseRequest(event1 -> {
                 String text = textFieldId.getText();
                 boolean disableButtons = text.isEmpty() || text.trim().isEmpty();
                 inviteId.setDisable(disableButtons);
-                byeId.setDisable(disableButtons);
+
             }
         });
 
@@ -797,6 +797,6 @@ primaryStage.setOnCloseRequest(event1 -> {
         String text = textFieldId.getText();
         boolean disableButtons = text.isEmpty() || text.trim().isEmpty();
        inviteId.setDisable(disableButtons);
-        byeId.setDisable(disableButtons);
+
     }
 }
