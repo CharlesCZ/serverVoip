@@ -20,6 +20,7 @@ after it write
 java -jar voip.jar
 8. You can also search for regedit on your system and then go to HKEY_CLASSES_ROOT\jarfile\shell\open\command and check if there path is "C:\Program Files\Java\jdk1.8.0_181\bin\javaw.exe" -jar "%1" %*
 you should have jdk1.8.0_181 or higher but up to java8
+
 ##License
 MIT
 
