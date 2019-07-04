@@ -15,12 +15,13 @@ How to run on Windows10 & 7
 6. Open CMD and write sqlite3
  to close database write .exit
 More on https://sqlite.org/cli.html
+7. Turn off all network adapters except one
 8. If everything is set then go to package with application
-7. If your double clicking on icon is not working. You can open it via CMD and write: 
+9. If your double clicking on icon is not working. You can open it via CMD and write: 
 cd _path of your voip application folder_ 
 after it write
 java -jar voip.jar
-8. You can also search for regedit on your system and then go to HKEY_CLASSES_ROOT\jarfile\shell\open\command and check if there path is "C:\Program Files\Java\jdk1.8.0_181\bin\javaw.exe" -jar "%1" %*
+10. You can also search for regedit on your system and then go to HKEY_CLASSES_ROOT\jarfile\shell\open\command and check if there path is "C:\Program Files\Java\jdk1.8.0_181\bin\javaw.exe" -jar "%1" %*
 you should have jdk1.8.0_181 or higher but up to java8
 
 License
